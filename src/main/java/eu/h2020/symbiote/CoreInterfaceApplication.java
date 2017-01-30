@@ -1,5 +1,7 @@
 package eu.h2020.symbiote;
 
+import eu.h2020.symbiote.communication.RabbitManager;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -8,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.sampler.AlwaysSampler;
+import org.springframework.stereotype.Component;
 
 
 /**
@@ -26,6 +29,23 @@ public class CoreInterfaceApplication {
             // Subscribe to RabbitMQ messages
         } catch (Exception e) {
             log.error("Error occured during subscribing from Core Interface", e);
+        }
+    }
+
+    @Component
+    public static class CLR implements CommandLineRunner {
+
+        private final RabbitManager rabbitManager;
+
+        @Autowired
+        public CLR( RabbitManager rabbitManager) {
+            this.rabbitManager = rabbitManager;
+        }
+
+        @Override
+        public void run(String... args) throws Exception {
+            this.rabbitManager.initCommunication();
+
         }
     }
 
