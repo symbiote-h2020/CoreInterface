@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  */
 @EnableDiscoveryClient
 @SpringBootApplication
-@CrossOrigin
 public class CoreInterfaceApplication {
 
 	private static Log log = LogFactory.getLog(CoreInterfaceApplication.class);
