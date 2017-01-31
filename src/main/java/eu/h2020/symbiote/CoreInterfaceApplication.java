@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.sampler.AlwaysSampler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 
 /**
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @EnableDiscoveryClient
 @SpringBootApplication
+@CrossOrigin
 public class CoreInterfaceApplication {
 
 	private static Log log = LogFactory.getLog(CoreInterfaceApplication.class);
