@@ -1,11 +1,9 @@
 package eu.h2020.symbiote.controllers;
 
-import com.google.common.collect.Lists;
 import eu.h2020.symbiote.communication.RabbitManager;
 import eu.h2020.symbiote.model.QueryRequest;
 import eu.h2020.symbiote.model.Resource;
 import eu.h2020.symbiote.model.ResourceUrlsRequest;
-import eu.h2020.symbiote.model.ResourceUrlsResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,7 @@ import java.util.Map;
  */
 
 @RestController
+@CrossOrigin
 public class CoreInterfaceController {
     private static final String URI_PREFIX = "/coreInterface/v1";
 
@@ -84,12 +83,12 @@ public class CoreInterfaceController {
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList(resourceId));
 
-        ResourceUrlsResponse response = this.rabbitManager.sendResourceUrlsRequest(request);
+        Map<String, String> response = this.rabbitManager.sendResourceUrlsRequest(request);
         if (response == null){
             return new ResponseEntity<String>("", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<Map<String, String>>(new HashMap<>(), HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<Map<String, String>>(response, HttpStatus.OK);
     }
 
 }

@@ -6,13 +6,13 @@ import com.rabbitmq.client.*;
 import eu.h2020.symbiote.model.QueryRequest;
 import eu.h2020.symbiote.model.Resource;
 import eu.h2020.symbiote.model.ResourceUrlsRequest;
-import eu.h2020.symbiote.model.ResourceUrlsResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -151,6 +151,7 @@ public class RabbitManager {
                     .builder()
                     .correlationId(correlationId)
                     .replyTo(replyQueueName)
+                    .contentType("application/json")
                     .build();
 
             QueueingConsumer consumer = new QueueingConsumer(channel);
@@ -186,15 +187,17 @@ public class RabbitManager {
      * @return object containing mapping of IDs to respective URLs
      *
      */
-    public ResourceUrlsResponse sendResourceUrlsRequest(ResourceUrlsRequest request) {
+    public Map<String, String> sendResourceUrlsRequest(ResourceUrlsRequest request) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String message = mapper.writeValueAsString(request);
+            System.out.println(message);
             String response = sendRpcMessage(this.cramExchangeName, this.getResourceUrlsRoutingKey, message);
             System.out.println("Response: " + response);
             if (response == null)
                 return null;
-            ResourceUrlsResponse responseObj = mapper.readValue(response, ResourceUrlsResponse.class);
+
+            Map<String, String> responseObj = mapper.readValue(response, new TypeReference<Map<String, String>>(){});
             return responseObj;
         } catch (IOException e) {
             e.printStackTrace();
