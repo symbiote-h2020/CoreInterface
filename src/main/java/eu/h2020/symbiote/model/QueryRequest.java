@@ -3,7 +3,7 @@ package eu.h2020.symbiote.model;
 import java.util.List;
 
 /**
- * Created by jawora on 24.01.17.
+ * POJO describing a query for resources.
  */
 public class QueryRequest {
 
@@ -19,21 +19,10 @@ public class QueryRequest {
     private Integer max_distance;
     private List<String> observed_property;
 
+    /**
+     * Default empty constructor.
+     */
     public QueryRequest() {
-    }
-
-    public QueryRequest(String platform_id, String platform_name, String owner, String name, String id, String description, String location_name, Double location_lat, Double location_long, Integer max_distance, List<String> observed_property) {
-        this.platform_id = platform_id;
-        this.platform_name = platform_name;
-        this.owner = owner;
-        this.name = name;
-        this.id = id;
-        this.description = description;
-        this.location_name = location_name;
-        this.location_lat = location_lat;
-        this.location_long = location_long;
-        this.max_distance = max_distance;
-        this.observed_property = observed_property;
     }
 
     public String getPlatform_id() {

@@ -3,10 +3,9 @@ package eu.h2020.symbiote.model;
 import java.util.List;
 
 /**
- * Created by jawora on 24.01.17.
+ * POJO describing a resource.
  */
 public class Resource {
-
     private String platformId;
     private String platformName;
     private String owner;
@@ -19,6 +18,9 @@ public class Resource {
     private Double locationAltitude;
     private List<String> observedProperties;
 
+    /**
+     * Default empty constructor.
+     */
     public Resource() {
     }
 

@@ -3,11 +3,14 @@ package eu.h2020.symbiote.model;
 import java.util.List;
 
 /**
- * Created by jawora on 25.01.17.
+ * POJO describing a request for resources' Interworking Interface URLs.
  */
 public class ResourceUrlsRequest {
     private List<String> idList;
 
+    /**
+     * Default empty constructor.
+     */
     public ResourceUrlsRequest() {
     }
 
