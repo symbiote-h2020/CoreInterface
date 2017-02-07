@@ -149,7 +149,7 @@ public class RabbitManager {
      * @param message      message to be sent
      * @return response from the consumer or null if timeout occurs
      */
-    private String sendRpcMessage(String exchangeName, String routingKey, String message) {
+    public String sendRpcMessage(String exchangeName, String routingKey, String message) {
         try {
             log.info("Sending RPC message: " + message);
 

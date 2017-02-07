@@ -15,8 +15,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.notNull;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CoreInterfaceControllerTests {
