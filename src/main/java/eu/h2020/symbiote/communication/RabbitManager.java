@@ -205,7 +205,7 @@ public class RabbitManager {
             log.info("Request for resource URLs");
             ObjectMapper mapper = new ObjectMapper();
             String message = mapper.writeValueAsString(request);
-            System.out.println(message);
+            log.debug(message);
             String response = sendRpcMessage(this.cramExchangeName, this.getResourceUrlsRoutingKey, message);
             if (response == null)
                 return null;
