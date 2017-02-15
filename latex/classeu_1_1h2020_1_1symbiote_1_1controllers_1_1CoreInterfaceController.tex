@@ -1,0 +1,134 @@
+\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController}{}\section{eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller Class Reference}
+\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController}\index{eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller@{eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller}}
+
+
+Collaboration diagram for eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=230pt]{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}{Core\+Interface\+Controller} (\hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager}{Rabbit\+Manager} rabbit\+Manager)
+\item 
+Response\+Entity$<$?$>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77e06f47bb9cea92496704aae1b88b86}{query} (@Request\+Param(value=\char`\"{}platform\+\_\+id\char`\"{}, required=false) String platform\+Id,@Request\+Param(value=\char`\"{}platform\+\_\+name\char`\"{}, required=false) String platform\+Name,@Request\+Param(value=\char`\"{}owner\char`\"{}, required=false) String owner,@Request\+Param(value=\char`\"{}name\char`\"{}, required=false) String name,@Request\+Param(value=\char`\"{}id\char`\"{}, required=false) String id,@Request\+Param(value=\char`\"{}description\char`\"{}, required=false) String description,@Request\+Param(value=\char`\"{}location\+\_\+name\char`\"{}, required=false) String location\+\_\+name,@Request\+Param(value=\char`\"{}location\+\_\+lat\char`\"{}, required=false) Double location\+\_\+lat,@Request\+Param(value=\char`\"{}location\+\_\+long\char`\"{}, required=false) Double location\+\_\+long,@Request\+Param(value=\char`\"{}max\+\_\+distance\char`\"{}, required=false) Integer max\+\_\+distance,@Request\+Param(value=\char`\"{}observed\+\_\+property\char`\"{}, required=false) String\mbox{[}$\,$\mbox{]} observed\+\_\+property)
+\item 
+Response\+Entity$<$?$>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_adfa6e88c052cd6e8978294588fe116d5}{sparql\+Query} (@Request\+Body String sparql\+Query)
+\item 
+Response\+Entity$<$?$>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a11f9875a81bc3f2a8150b1fb12285ce4}{get\+Resource\+Urls} (@Request\+Param(\char`\"{}id\char`\"{}) String\mbox{[}$\,$\mbox{]} resource\+Id)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static Log {\bfseries log} = Log\+Factory.\+get\+Log(Core\+Interface\+Controller.\+class)\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a0890e1d907ac6cfdd976c53c5cdb5743}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a0890e1d907ac6cfdd976c53c5cdb5743}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class defining all R\+E\+ST endpoints. 
+
+Core\+Interface, as the name suggests, is just an interface, therefore it forwards all requests to modules responsible for handling them via Rabbit\+MQ. 
+
+\subsection{Constructor \& Destructor Documentation}
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!Core\+Interface\+Controller@{Core\+Interface\+Controller}}
+\index{Core\+Interface\+Controller@{Core\+Interface\+Controller}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection[{\texorpdfstring{Core\+Interface\+Controller(\+Rabbit\+Manager rabbit\+Manager)}{CoreInterfaceController(RabbitManager rabbitManager)}}]{\setlength{\rightskip}{0pt plus 5cm}eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+Core\+Interface\+Controller (
+\begin{DoxyParamCaption}
+\item[{{\bf Rabbit\+Manager}}]{rabbit\+Manager}
+\end{DoxyParamCaption}
+)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}
+Class constructor which autowires Rabbit\+Manager bean.
+
+
+\begin{DoxyParams}{Parameters}
+{\em rabbit\+Manager} & Rabbit\+Manager bean \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!get\+Resource\+Urls@{get\+Resource\+Urls}}
+\index{get\+Resource\+Urls@{get\+Resource\+Urls}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection[{\texorpdfstring{get\+Resource\+Urls("@Request\+Param(""id"") String[] resource\+Id)}{getResourceUrls(@RequestParam("id") String[] resourceId)}}]{\setlength{\rightskip}{0pt plus 5cm}Response\+Entity$<$?$>$ eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+get\+Resource\+Urls (
+\begin{DoxyParamCaption}
+\item[{@Request\+Param(\char`\"{}id\char`\"{}) String\mbox{[}$\,$\mbox{]}}]{resource\+Id}
+\end{DoxyParamCaption}
+)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a11f9875a81bc3f2a8150b1fb12285ce4}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a11f9875a81bc3f2a8150b1fb12285ce4}
+Endpoint for querying U\+RL of resources\textquotesingle{} Interworking Interface.
+
+After receiving query results, user (or application) may choose interesting resources to contact, but it does not have any means of communicate with resources\textquotesingle{} Interworking Interface. Therefore, it needs to send another request querying for U\+R\+Ls Interworking Services of resources of specified I\+Ds.
+
+
+\begin{DoxyParams}{Parameters}
+{\em resource\+Id} & ID of a resource to get Interworking Interface U\+RL; multiple I\+Ds can be passed\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+map containing entries in a form of \{\char`\"{}resource\+Id1\char`\"{}\+:\char`\"{}\+Interworking\+Interface\+Url1\char`\"{}, \char`\"{}resource\+Id2\char`\"{}\+:\char`\"{}\+Interworking\+Interface2\char`\"{}, ... \} 
+\end{DoxyReturn}
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!query@{query}}
+\index{query@{query}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection[{\texorpdfstring{query("@Request\+Param(value=""platform\+\_\+id"", required=false) String platform\+Id,"@Request\+Param(value=""platform\+\_\+name"", required=false) String platform\+Name,"@Request\+Param(value=""owner"", required=false) String owner,"@Request\+Param(value=""name"", required=false) String name,"@Request\+Param(value=""id"", required=false) String id,"@Request\+Param(value=""description"", required=false) String description,"@Request\+Param(value=""location\+\_\+name"", required=false) String location\+\_\+name,"@Request\+Param(value=""location\+\_\+lat"", required=false) Double location\+\_\+lat,"@Request\+Param(value=""location\+\_\+long"", required=false) Double location\+\_\+long,"@Request\+Param(value=""max\+\_\+distance"", required=false) Integer max\+\_\+distance,"@Request\+Param(value=""observed\+\_\+property"", required=false) String[] observed\+\_\+property)}{query(@RequestParam(value="platform_id", required=false) String platformId,@RequestParam(value="platform_name", required=false) String platformName,@RequestParam(value="owner", required=false) String owner,@RequestParam(value="name", required=false) String name,@RequestParam(value="id", required=false) String id,@RequestParam(value="description", required=false) String description,@RequestParam(value="location_name", required=false) String location_name,@RequestParam(value="location_lat", required=false) Double location_lat,@RequestParam(value="location_long", required=false) Double location_long,@RequestParam(value="max_distance", required=false) Integer max_distance,@RequestParam(value="observed_property", required=false) String[] observed_property)}}]{\setlength{\rightskip}{0pt plus 5cm}Response\+Entity$<$?$>$ eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+query (
+\begin{DoxyParamCaption}
+\item[{@Request\+Param(value=\char`\"{}platform\+\_\+id\char`\"{}, required=false) String}]{platform\+Id, }
+\item[{@Request\+Param(value=\char`\"{}platform\+\_\+name\char`\"{}, required=false) String}]{platform\+Name, }
+\item[{@Request\+Param(value=\char`\"{}owner\char`\"{}, required=false) String}]{owner, }
+\item[{@Request\+Param(value=\char`\"{}name\char`\"{}, required=false) String}]{name, }
+\item[{@Request\+Param(value=\char`\"{}id\char`\"{}, required=false) String}]{id, }
+\item[{@Request\+Param(value=\char`\"{}description\char`\"{}, required=false) String}]{description, }
+\item[{@Request\+Param(value=\char`\"{}location\+\_\+name\char`\"{}, required=false) String}]{location\+\_\+name, }
+\item[{@Request\+Param(value=\char`\"{}location\+\_\+lat\char`\"{}, required=false) Double}]{location\+\_\+lat, }
+\item[{@Request\+Param(value=\char`\"{}location\+\_\+long\char`\"{}, required=false) Double}]{location\+\_\+long, }
+\item[{@Request\+Param(value=\char`\"{}max\+\_\+distance\char`\"{}, required=false) Integer}]{max\+\_\+distance, }
+\item[{@Request\+Param(value=\char`\"{}observed\+\_\+property\char`\"{}, required=false) String\mbox{[}$\,$\mbox{]}}]{observed\+\_\+property}
+\end{DoxyParamCaption}
+)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77e06f47bb9cea92496704aae1b88b86}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77e06f47bb9cea92496704aae1b88b86}
+Endpoint for querying registered resources. Query parameters are passed via G\+ET request params and are all optional. When passing multiple parameters, including multiple observed\+\_\+properties, they are all linked with logical A\+ND operator. In \char`\"{}text\char`\"{} parameters (name, description, platform\+Name, owner, location\+Name), $\ast$ can be used as a wildcard in the beginning or/and in the end of value.
+
+
+\begin{DoxyParams}{Parameters}
+{\em platform\+Id} & symb\+Io\+Te ID of a platform that resource belongs to \\
+\hline
+{\em platform\+Name} & name of a platform that resource belongs to \\
+\hline
+{\em owner} & owner of the resource \\
+\hline
+{\em name} & name of the resource \\
+\hline
+{\em id} & symb\+Io\+Te ID of the resource \\
+\hline
+{\em description} & description of the resource \\
+\hline
+{\em location\+\_\+name} & name of resource location \\
+\hline
+{\em location\+\_\+lat} & latitude of resource location \\
+\hline
+{\em location\+\_\+long} & longitude of resource location \\
+\hline
+{\em max\+\_\+distance} & maximal distance from specified resource latitude and longitude (in meters) \\
+\hline
+{\em observed\+\_\+property} & property observed by resource; can be set multiple times to indicate more than one observed property \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+query result as body or null along with appropriate error H\+T\+TP status code 
+\end{DoxyReturn}
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!sparql\+Query@{sparql\+Query}}
+\index{sparql\+Query@{sparql\+Query}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection[{\texorpdfstring{sparql\+Query("@Request\+Body String sparql\+Query)}{sparqlQuery(@RequestBody String sparqlQuery)}}]{\setlength{\rightskip}{0pt plus 5cm}Response\+Entity$<$?$>$ eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+sparql\+Query (
+\begin{DoxyParamCaption}
+\item[{@Request\+Body String}]{sparql\+Query}
+\end{DoxyParamCaption}
+)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_adfa6e88c052cd6e8978294588fe116d5}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_adfa6e88c052cd6e8978294588fe116d5}
+Endpoint for querying registered resources using S\+P\+A\+R\+QL. 
+
+Currently not implemented. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/main/java/eu/h2020/symbiote/controllers/Core\+Interface\+Controller.\+java\end{DoxyCompactItemize}
