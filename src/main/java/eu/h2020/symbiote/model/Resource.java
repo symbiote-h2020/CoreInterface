@@ -17,6 +17,7 @@ public class Resource {
     private Double locationLongitude;
     private Double locationAltitude;
     private List<String> observedProperties;
+    private String type;
 
     /**
      * Default empty constructor.
@@ -110,5 +111,13 @@ public class Resource {
 
     public void setObservedProperties(List<String> observedProperties) {
         this.observedProperties = observedProperties;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
