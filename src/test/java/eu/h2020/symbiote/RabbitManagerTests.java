@@ -23,7 +23,7 @@ public class RabbitManagerTests {
     public void testSendResourceUrls_timeout() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Collections.singletonList("123"));
@@ -37,7 +37,7 @@ public class RabbitManagerTests {
     public void testSendResourceUrls_emptyList() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn("{}").when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn("{}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList("123", "abc", "xyz"));
@@ -62,7 +62,7 @@ public class RabbitManagerTests {
                 "}";
 
 
-        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList("123", "abc", "xyz"));
@@ -84,7 +84,7 @@ public class RabbitManagerTests {
     public void testSendSearchRequest_timeout() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         QueryRequest request = new QueryRequest();
         List<Resource> response = rabbitManager.sendSearchRequest(request);
@@ -97,7 +97,7 @@ public class RabbitManagerTests {
     public void testSendSearchRequest_emptyResult() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn("[]").when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn("[]").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         QueryRequest request = new QueryRequest();
         List<Resource> response = rabbitManager.sendSearchRequest(request);
@@ -124,7 +124,7 @@ public class RabbitManagerTests {
                 "}" +
                 "]";
 
-        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         QueryRequest request = new QueryRequest();
         List<Resource> response = rabbitManager.sendSearchRequest(request);
