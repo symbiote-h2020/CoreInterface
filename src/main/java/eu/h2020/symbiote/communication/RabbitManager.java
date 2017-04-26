@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -149,18 +150,24 @@ public class RabbitManager {
      * @param message      message to be sent
      * @return response from the consumer or null if timeout occurs
      */
-    public String sendRpcMessage(String exchangeName, String routingKey, String message) {
+    public String sendRpcMessage(String exchangeName, String routingKey, String message, String classType) {
         try {
             log.info("Sending RPC message: " + message);
 
             String replyQueueName = this.channel.queueDeclare().getQueue();
 
             String correlationId = UUID.randomUUID().toString();
+
+            Map<String, Object> headers = new HashMap<>();
+            headers.put("__TypeId__", classType);
+            headers.put("__ContentTypeId__", Object.class.getCanonicalName());
+
             AMQP.BasicProperties props = new AMQP.BasicProperties()
                     .builder()
                     .correlationId(correlationId)
                     .replyTo(replyQueueName)
                     .contentType("application/json")
+                    .headers(headers)
                     .build();
 
             QueueingConsumer consumer = new QueueingConsumer(channel);
@@ -206,7 +213,7 @@ public class RabbitManager {
             ObjectMapper mapper = new ObjectMapper();
             String message = mapper.writeValueAsString(request);
             log.debug(message);
-            String response = sendRpcMessage(this.cramExchangeName, this.getResourceUrlsRoutingKey, message);
+            String response = sendRpcMessage(this.cramExchangeName, this.getResourceUrlsRoutingKey, message, request.getClass().getCanonicalName());
             if (response == null)
                 return null;
 
@@ -221,7 +228,7 @@ public class RabbitManager {
 
     /**
      * Method used to send RPC request to query symbIoTe registry for resources.
-     *
+     * <p>
      * Returned resources do not contain URLs to contact them.
      * Another call to {@link #sendResourceUrlsRequest(ResourceUrlsRequest)} is needed to obtain URLs.
      *
@@ -233,7 +240,7 @@ public class RabbitManager {
             log.info("Request for resource query");
             ObjectMapper mapper = new ObjectMapper();
             String message = mapper.writeValueAsString(request);
-            String response = sendRpcMessage(this.resourceExchangeName, this.resourceSearchRequestedRoutingKey, message);
+            String response = sendRpcMessage(this.resourceExchangeName, this.resourceSearchRequestedRoutingKey, message, request.getClass().getCanonicalName());
             if (response == null)
                 return null;
             List<Resource> responseObj = mapper.readValue(response, new TypeReference<List<Resource>>() {
