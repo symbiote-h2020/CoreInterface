@@ -1,9 +1,9 @@
 package eu.h2020.symbiote;
 
 import eu.h2020.symbiote.communication.RabbitManager;
+import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import eu.h2020.symbiote.model.QueryRequest;
 import eu.h2020.symbiote.model.Resource;
-import eu.h2020.symbiote.model.ResourceUrlsRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;

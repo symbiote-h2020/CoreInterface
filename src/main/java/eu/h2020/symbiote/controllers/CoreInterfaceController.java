@@ -1,9 +1,9 @@
 package eu.h2020.symbiote.controllers;
 
 import eu.h2020.symbiote.communication.RabbitManager;
+import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import eu.h2020.symbiote.model.QueryRequest;
 import eu.h2020.symbiote.model.Resource;
-import eu.h2020.symbiote.model.ResourceUrlsRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,20 +111,20 @@ public class CoreInterfaceController {
 
     /**
      * Endpoint for querying URL of resources' Interworking Interface.
-     *
+     * <p>
      * After receiving query results, user (or application) may choose interesting resources to contact, but it does not
      * have any means of communicate with resources' Interworking Interface. Therefore, it needs to send another request
      * querying for URLs Interworking Services of resources of specified IDs.
      *
      * @param resourceId ID of a resource to get Interworking Interface URL; multiple IDs can be passed
-     *
      * @return map containing entries in a form of {"resourceId1":"InterworkingInterfaceUrl1", "resourceId2":"InterworkingInterface2", ... }
      */
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/resourceUrls")
-    public ResponseEntity<?> getResourceUrls(@RequestParam("id") String[] resourceId) {
+    public ResponseEntity<?> getResourceUrls(@RequestParam("id") String[] resourceId, @RequestHeader("Authorization") String token) {
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList(resourceId));
+        request.setToken(token);
 
         Map<String, String> response = this.rabbitManager.sendResourceUrlsRequest(request);
         if (response == null) {

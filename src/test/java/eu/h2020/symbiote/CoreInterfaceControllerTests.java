@@ -2,9 +2,9 @@ package eu.h2020.symbiote;
 
 import eu.h2020.symbiote.communication.RabbitManager;
 import eu.h2020.symbiote.controllers.CoreInterfaceController;
+import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import eu.h2020.symbiote.model.QueryRequest;
 import eu.h2020.symbiote.model.Resource;
-import eu.h2020.symbiote.model.ResourceUrlsRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -15,7 +15,8 @@ import org.springframework.http.ResponseEntity;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CoreInterfaceControllerTests {
@@ -122,7 +123,7 @@ public class CoreInterfaceControllerTests {
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
         try {
-            controller.getResourceUrls(null);
+            controller.getResourceUrls(null, null);
             fail();
         } catch (NullPointerException e) {
             //test passed - method should throw exception when passing null
@@ -136,7 +137,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.getResourceUrls(new String[]{"123"});
+        ResponseEntity response = controller.getResourceUrls(new String[]{"123"}, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -153,7 +154,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.getResourceUrls(new String[]{"123", "abc", "xyz"});
+        ResponseEntity response = controller.getResourceUrls(new String[]{"123", "abc", "xyz"}, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertTrue(response.getBody() instanceof Map);
