@@ -3,9 +3,10 @@ package eu.h2020.symbiote.communication;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
+import eu.h2020.symbiote.core.ci.QueryResponse;
+import eu.h2020.symbiote.core.internal.CoreQueryRequest;
+import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
-import eu.h2020.symbiote.model.QueryRequest;
-import eu.h2020.symbiote.model.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -28,6 +28,8 @@ import java.util.concurrent.TimeoutException;
 @Component
 public class RabbitManager {
     private static Log log = LogFactory.getLog(RabbitManager.class);
+
+    private static final String CORE_PARSE_ERROR_MSG = "Error while parsing response value from Core components";
 
     @Value("${rabbit.host}")
     private String rabbitHost;
@@ -82,6 +84,9 @@ public class RabbitManager {
 
     @Value("${rabbit.routingKey.resource.searchRequested}")
     private String resourceSearchRequestedRoutingKey;
+
+    @Value("${rabbit.routingKey.resource.sparqlSearchRequested}")
+    private String resourceSparqlSearchRequestedRoutingKey;
 
     private Connection connection;
     private Channel channel;
@@ -201,7 +206,7 @@ public class RabbitManager {
     /**
      * Method used to send RPC request to get specified resources URLs.
      * <p>
-     * Upon querying symbIoTe using {@link #sendSearchRequest(QueryRequest)}, user gets resource without their Resource Access Proxy's URLs.
+     * Upon querying symbIoTe using {@link #sendSearchRequest(CoreQueryRequest)}, user gets resource without their Resource Access Proxy's URLs.
      * It is necessary to obtain them from core Resource Access Monitor by supplying list of chosen resource IDs.
      *
      * @param request request object containing IDs of resources to get URLs
@@ -217,11 +222,10 @@ public class RabbitManager {
             if (response == null)
                 return null;
 
-            Map<String, String> responseObj = mapper.readValue(response, new TypeReference<Map<String, String>>() {
+            return mapper.readValue(response, new TypeReference<Map<String, String>>() {
             });
-            return responseObj;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(CORE_PARSE_ERROR_MSG, e);
         }
         return null;
     }
@@ -235,7 +239,7 @@ public class RabbitManager {
      * @param request request object describing query parameters
      * @return response list of requested resources, or null when timeout occurs
      */
-    public List<Resource> sendSearchRequest(QueryRequest request) {
+    public QueryResponse sendSearchRequest(CoreQueryRequest request) {
         try {
             log.info("Request for resource query");
             ObjectMapper mapper = new ObjectMapper();
@@ -243,11 +247,33 @@ public class RabbitManager {
             String response = sendRpcMessage(this.resourceExchangeName, this.resourceSearchRequestedRoutingKey, message, request.getClass().getCanonicalName());
             if (response == null)
                 return null;
-            List<Resource> responseObj = mapper.readValue(response, new TypeReference<List<Resource>>() {
-            });
-            return responseObj;
+            return mapper.readValue(response, QueryResponse.class);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(CORE_PARSE_ERROR_MSG, e);
+        }
+        return null;
+    }
+
+    /**
+     * Method used to send RPC request to query symbIoTe registry for resources using sparql.
+     * <p>
+     * Returned resources do not contain URLs to contact them.
+     * Another call to {@link #sendResourceUrlsRequest(ResourceUrlsRequest)} is needed to obtain URLs.
+     *
+     * @param request request object describing sparql query parameters
+     * @return response string of requested resources, or null when timeout occurs
+     */
+    public String sendSparqlSearchRequest(CoreSparqlQueryRequest request) {
+        try {
+            log.info("Request for resource sparql query");
+            ObjectMapper mapper = new ObjectMapper();
+            String message = mapper.writeValueAsString(request);
+            String response = sendRpcMessage(this.resourceExchangeName, this.resourceSparqlSearchRequestedRoutingKey, message, request.getClass().getCanonicalName());
+            if (response == null)
+                return null;
+            return mapper.readValue(response, String.class);
+        } catch (IOException e) {
+            log.error(CORE_PARSE_ERROR_MSG, e);
         }
         return null;
     }

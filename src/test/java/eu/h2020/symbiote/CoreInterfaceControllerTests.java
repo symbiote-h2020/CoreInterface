@@ -2,9 +2,10 @@ package eu.h2020.symbiote;
 
 import eu.h2020.symbiote.communication.RabbitManager;
 import eu.h2020.symbiote.controllers.CoreInterfaceController;
+import eu.h2020.symbiote.core.ci.QueryResourceResult;
+import eu.h2020.symbiote.core.ci.QueryResponse;
+import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
-import eu.h2020.symbiote.model.QueryRequest;
-import eu.h2020.symbiote.model.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -24,11 +25,11 @@ public class CoreInterfaceControllerTests {
     @Test
     public void testQuery_timeout() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        when(rabbitManager.sendSearchRequest((QueryRequest) notNull())).thenReturn(null);
+        when(rabbitManager.sendSearchRequest((CoreQueryRequest) notNull())).thenReturn(null);
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, null);
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, null, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -36,23 +37,23 @@ public class CoreInterfaceControllerTests {
     @Test
     public void testQuery_emptyResults() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        when(rabbitManager.sendSearchRequest((QueryRequest) notNull())).thenReturn(new ArrayList<>());
+        when(rabbitManager.sendSearchRequest((CoreQueryRequest) notNull())).thenReturn(new QueryResponse());
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"});
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
-        assertTrue(response.getBody() instanceof List);
-        assertEquals(0, ((List) response.getBody()).size());
+        assertTrue(response.getBody() instanceof QueryResponse);
+        assertEquals(0, ((QueryResponse) response.getBody()).getResources().size());
     }
 
     @Test
     public void testQuery_3results() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        List<Resource> resourceList = new ArrayList<>();
+        QueryResponse resourceList = new QueryResponse();
 
-        Resource resource1 = new Resource();
+        QueryResourceResult resource1 = new QueryResourceResult();
         resource1.setPlatformId("platform1");
         resource1.setPlatformName("Platform 1");
         resource1.setOwner("Owner 1");
@@ -65,7 +66,7 @@ public class CoreInterfaceControllerTests {
         resource1.setLocationAltitude(80.0);
         resource1.setObservedProperties(Arrays.asList("Temp", "Hum"));
 
-        Resource resource2 = new Resource();
+        QueryResourceResult resource2 = new QueryResourceResult();
         resource2.setPlatformId("platform1");
         resource2.setPlatformName("Platform 1");
         resource2.setOwner("Owner 1");
@@ -78,7 +79,7 @@ public class CoreInterfaceControllerTests {
         resource2.setLocationAltitude(80.0);
         resource2.setObservedProperties(Collections.singletonList("CO2"));
 
-        Resource resource3 = new Resource();
+        QueryResourceResult resource3 = new QueryResourceResult();
         resource3.setPlatformId("platform2");
         resource3.setPlatformName("Platform 2");
         resource3.setOwner("Owner 2");
@@ -91,29 +92,19 @@ public class CoreInterfaceControllerTests {
         resource3.setLocationAltitude(80.0);
         resource3.setObservedProperties(Arrays.asList("Temp", "Hum"));
 
-        resourceList.add(resource1);
-        resourceList.add(resource2);
-        resourceList.add(resource3);
+        resourceList.getResources().add(resource1);
+        resourceList.getResources().add(resource2);
+        resourceList.getResources().add(resource3);
 
-        when(rabbitManager.sendSearchRequest((QueryRequest) notNull())).thenReturn(resourceList);
+        when(rabbitManager.sendSearchRequest((CoreQueryRequest) notNull())).thenReturn(resourceList);
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"});
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
-        assertTrue(response.getBody() instanceof List);
-        assertEquals(3, ((List) response.getBody()).size());
-    }
-
-    @Test
-    public void testSparqlQuery() {
-        RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
-
-        ResponseEntity response = controller.sparqlQuery(null);
-
-        assertEquals(response.getStatusCode(), HttpStatus.NOT_IMPLEMENTED);
+        assertTrue(response.getBody() instanceof QueryResponse);
+        assertEquals(3, ((QueryResponse) response.getBody()).getResources().size());
     }
 
     @Test

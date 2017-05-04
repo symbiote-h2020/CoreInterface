@@ -1,9 +1,11 @@
 package eu.h2020.symbiote.controllers;
 
 import eu.h2020.symbiote.communication.RabbitManager;
+import eu.h2020.symbiote.core.ci.QueryResponse;
+import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
+import eu.h2020.symbiote.core.internal.CoreQueryRequest;
+import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
-import eu.h2020.symbiote.model.QueryRequest;
-import eu.h2020.symbiote.model.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ import java.util.Map;
 public class CoreInterfaceController {
     private static final String URI_PREFIX = "/coreInterface/v1";
 
-    public static Log log = LogFactory.getLog(CoreInterfaceController.class);
+    public static final Log log = LogFactory.getLog(CoreInterfaceController.class);
 
     private final RabbitManager rabbitManager;
 
@@ -62,19 +63,20 @@ public class CoreInterfaceController {
      */
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/query")
-    public ResponseEntity<?> query(@RequestParam(value = "platform_id", required = false) String platformId,
-                                   @RequestParam(value = "platform_name", required = false) String platformName,
-                                   @RequestParam(value = "owner", required = false) String owner,
-                                   @RequestParam(value = "name", required = false) String name,
-                                   @RequestParam(value = "id", required = false) String id,
-                                   @RequestParam(value = "description", required = false) String description,
-                                   @RequestParam(value = "location_name", required = false) String location_name,
-                                   @RequestParam(value = "location_lat", required = false) Double location_lat,
-                                   @RequestParam(value = "location_long", required = false) Double location_long,
-                                   @RequestParam(value = "max_distance", required = false) Integer max_distance,
-                                   @RequestParam(value = "observed_property", required = false) String[] observed_property) {
+    public ResponseEntity query(@RequestParam(value = "platform_id", required = false) String platformId,
+                                @RequestParam(value = "platform_name", required = false) String platformName,
+                                @RequestParam(value = "owner", required = false) String owner,
+                                @RequestParam(value = "name", required = false) String name,
+                                @RequestParam(value = "id", required = false) String id,
+                                @RequestParam(value = "description", required = false) String description,
+                                @RequestParam(value = "location_name", required = false) String location_name,
+                                @RequestParam(value = "location_lat", required = false) Double location_lat,
+                                @RequestParam(value = "location_long", required = false) Double location_long,
+                                @RequestParam(value = "max_distance", required = false) Integer max_distance,
+                                @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                @RequestHeader("X-Auth-Token") String token) {
 
-        QueryRequest queryRequest = new QueryRequest();
+        CoreQueryRequest queryRequest = new CoreQueryRequest();
         queryRequest.setPlatform_id(platformId);
         queryRequest.setPlatform_name(platformName);
         queryRequest.setOwner(owner);
@@ -85,13 +87,14 @@ public class CoreInterfaceController {
         queryRequest.setLocation_lat(location_lat);
         queryRequest.setLocation_long(location_long);
         queryRequest.setMax_distance(max_distance);
+        queryRequest.setToken(token);
         if (observed_property != null) {
             queryRequest.setObserved_property(Arrays.asList(observed_property));
         }
 
-        List<Resource> resources = this.rabbitManager.sendSearchRequest(queryRequest);
+        QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
         if (resources == null) {
-            return new ResponseEntity<>("", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(resources, HttpStatus.OK);
@@ -100,12 +103,26 @@ public class CoreInterfaceController {
     /**
      * Endpoint for querying registered resources using SPARQL.
      * <p>
-     * Currently not implemented.
+     * After receiving query results, user (or application) may choose interesting resources to contact, but it does not
+     * have any means of communicate with resources' Interworking Interface. Therefore, it needs to send another request
+     * querying for URLs Interworking Services of resources of specified IDs.
+     *
+     * @param sparqlQuery query object containing sparql query and output format to get results in
+     * @param token security token
      */
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + "/sparqlQuery")
-    public ResponseEntity<?> sparqlQuery(@RequestBody String sparqlQuery) {
-        return new ResponseEntity<>("Sparql Query " + sparqlQuery, HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity sparqlQuery(@RequestBody SparqlQueryRequest sparqlQuery, @RequestHeader("X-Auth-Token") String token) {
+        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+        request.setToken(token);
+        request.setQuery(sparqlQuery.getSparqlQuery());
+        request.setOutputFormat(sparqlQuery.getOutputFormat());
+        String resources = this.rabbitManager.sendSparqlSearchRequest(request);
+        if (resources == null) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
 
@@ -121,7 +138,7 @@ public class CoreInterfaceController {
      */
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/resourceUrls")
-    public ResponseEntity<?> getResourceUrls(@RequestParam("id") String[] resourceId, @RequestHeader("Authorization") String token) {
+    public ResponseEntity getResourceUrls(@RequestParam("id") String[] resourceId, @RequestHeader("X-Auth-Token") String token) {
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList(resourceId));
         request.setToken(token);
