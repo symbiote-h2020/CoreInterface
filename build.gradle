@@ -26,8 +26,8 @@ jar {
 
 repositories {
     mavenCentral()
-    maven { 
-        url "https://jitpack.io" 
+    maven {
+        url "https://jitpack.io"
     }
     maven {
         url 'https://repo.spring.io/libs-snapshot'
@@ -44,7 +44,6 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
