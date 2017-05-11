@@ -6,12 +6,16 @@ import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
+import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.payloads.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -30,6 +34,9 @@ public class CoreInterfaceController {
     public static final Log log = LogFactory.getLog(CoreInterfaceController.class);
 
     private final RabbitManager rabbitManager;
+
+    @Value("${symbiote.aamUrl}")
+    private String aamUrl;
 
     /**
      * Class constructor which autowires RabbitManager bean.
@@ -152,5 +159,31 @@ public class CoreInterfaceController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + "/login")
+    public ResponseEntity login(@RequestBody Credentials user) {
+        return new RestTemplate().postForEntity(this.aamUrl + "login", user, String.class);
+    }
+
+    @RequestMapping(method = RequestMethod.GET,
+            value = URI_PREFIX + "/get_ca_cert")
+    public ResponseEntity getCaCert() {
+        return new RestTemplate().getForEntity(this.aamUrl + "get_ca_cert", String.class);
+    }
+
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + "/request_foreign_token")
+    public ResponseEntity requestForeignToken(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
+        return new RestTemplate().postForEntity(this.aamUrl + "request_foreign_token", token, String.class);
+    }
+
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + "/check_home_token_revocation")
+    public ResponseEntity checkHomeTokenRevocation(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
+        return new RestTemplate().postForEntity(this.aamUrl + "check_home_token_revocation", token, String.class);
+    }
+
+
 
 }
