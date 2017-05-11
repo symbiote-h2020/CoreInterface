@@ -74,6 +74,7 @@ public class CoreInterfaceController {
                                 @RequestParam(value = "location_long", required = false) Double location_long,
                                 @RequestParam(value = "max_distance", required = false) Integer max_distance,
                                 @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                @RequestParam(value = "resource_type", required = false) String resource_type,
                                 @RequestHeader("X-Auth-Token") String token) {
 
         CoreQueryRequest queryRequest = new CoreQueryRequest();
@@ -87,6 +88,7 @@ public class CoreInterfaceController {
         queryRequest.setLocation_lat(location_lat);
         queryRequest.setLocation_long(location_long);
         queryRequest.setMax_distance(max_distance);
+        queryRequest.setResource_type(resource_type);
         queryRequest.setToken(token);
         if (observed_property != null) {
             queryRequest.setObserved_property(Arrays.asList(observed_property));
