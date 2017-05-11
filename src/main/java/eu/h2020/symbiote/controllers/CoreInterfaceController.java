@@ -7,11 +7,14 @@ import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.constants.SecurityHandlerConstants;
 import eu.h2020.symbiote.security.payloads.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -162,40 +165,50 @@ public class CoreInterfaceController {
     }
 
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + "/login")
+            value = URI_PREFIX + SecurityHandlerConstants.DO_CORE_AAM_LOGIN)
     public ResponseEntity login(@RequestBody Credentials user) {
         try {
-            return new RestTemplate().postForEntity(this.aamUrl + "login", user, String.class);
+            return new RestTemplate().postForEntity(this.aamUrl + SecurityHandlerConstants.DO_CORE_AAM_LOGIN, user, String.class);
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
     @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + "/get_ca_cert")
+            value = URI_PREFIX + SecurityHandlerConstants.GET_CORE_AAM_CA_CERTIFICATE)
     public ResponseEntity getCaCert() {
         try {
-            return new RestTemplate().getForEntity(this.aamUrl + "get_ca_cert", String.class);
+            return new RestTemplate().getForEntity(this.aamUrl + SecurityHandlerConstants.GET_CORE_AAM_CA_CERTIFICATE, String.class);
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + "/request_foreign_token")
+            value = URI_PREFIX + SecurityHandlerConstants.DO_REQUEST_FOREIGN_TOKEN)
     public ResponseEntity requestForeignToken(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
         try {
-            return new RestTemplate().postForEntity(this.aamUrl + "request_foreign_token", token, String.class);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(AAMConstants.TOKEN_HEADER_NAME, token);
+
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            return new RestTemplate().postForEntity(this.aamUrl + SecurityHandlerConstants.DO_REQUEST_FOREIGN_TOKEN, entity, String.class);
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + "/check_home_token_revocation")
+            value = URI_PREFIX + SecurityHandlerConstants.DO_CORE_AAM_CHECK_TOKEN_REVOCATION)
     public ResponseEntity checkHomeTokenRevocation(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
         try {
-            return new RestTemplate().postForEntity(this.aamUrl + "check_home_token_revocation", token, String.class);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(AAMConstants.TOKEN_HEADER_NAME, token);
+
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            return new RestTemplate().postForEntity(this.aamUrl + SecurityHandlerConstants.DO_CORE_AAM_CHECK_TOKEN_REVOCATION, entity, String.class);
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
