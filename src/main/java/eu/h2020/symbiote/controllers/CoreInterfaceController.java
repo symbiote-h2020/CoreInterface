@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -166,7 +166,7 @@ public class CoreInterfaceController {
     public ResponseEntity login(@RequestBody Credentials user) {
         try {
             return new RestTemplate().postForEntity(this.aamUrl + "login", user, String.class);
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
@@ -176,7 +176,7 @@ public class CoreInterfaceController {
     public ResponseEntity getCaCert() {
         try {
             return new RestTemplate().getForEntity(this.aamUrl + "get_ca_cert", String.class);
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
@@ -186,7 +186,7 @@ public class CoreInterfaceController {
     public ResponseEntity requestForeignToken(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
         try {
             return new RestTemplate().postForEntity(this.aamUrl + "request_foreign_token", token, String.class);
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
@@ -196,7 +196,7 @@ public class CoreInterfaceController {
     public ResponseEntity checkHomeTokenRevocation(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
         try {
             return new RestTemplate().postForEntity(this.aamUrl + "check_home_token_revocation", token, String.class);
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
