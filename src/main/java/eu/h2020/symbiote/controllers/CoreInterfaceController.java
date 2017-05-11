@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -117,7 +118,7 @@ public class CoreInterfaceController {
      * querying for URLs Interworking Services of resources of specified IDs.
      *
      * @param sparqlQuery query object containing sparql query and output format to get results in
-     * @param token security token
+     * @param token       security token
      */
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + "/sparqlQuery")
@@ -163,27 +164,42 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + "/login")
     public ResponseEntity login(@RequestBody Credentials user) {
-        return new RestTemplate().postForEntity(this.aamUrl + "login", user, String.class);
+        try {
+            return new RestTemplate().postForEntity(this.aamUrl + "login", user, String.class);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/get_ca_cert")
     public ResponseEntity getCaCert() {
-        return new RestTemplate().getForEntity(this.aamUrl + "get_ca_cert", String.class);
+        try {
+            return new RestTemplate().getForEntity(this.aamUrl + "get_ca_cert", String.class);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + "/request_foreign_token")
     public ResponseEntity requestForeignToken(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
-        return new RestTemplate().postForEntity(this.aamUrl + "request_foreign_token", token, String.class);
+        try {
+            return new RestTemplate().postForEntity(this.aamUrl + "request_foreign_token", token, String.class);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + "/check_home_token_revocation")
     public ResponseEntity checkHomeTokenRevocation(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
-        return new RestTemplate().postForEntity(this.aamUrl + "check_home_token_revocation", token, String.class);
+        try {
+            return new RestTemplate().postForEntity(this.aamUrl + "check_home_token_revocation", token, String.class);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
     }
-
 
 
 }
