@@ -92,6 +92,7 @@ public class RabbitManager {
 
     private Connection connection;
     private Channel channel;
+    private String durableResponseQueueName;
 
     /**
      * Method used to initialise RabbitMQ connection and declare all required exchanges.
@@ -123,6 +124,8 @@ public class RabbitManager {
                     this.cramExchangeAutodelete,
                     this.cramExchangeInternal,
                     null);
+
+            this.durableResponseQueueName = this.channel.queueDeclare("symbIoTe-CoreInterface-rpcReplyQueue",true,true,false,null).getQueue();
 
         } catch (IOException | TimeoutException e) {
             log.error(e.getMessage(), e);
@@ -161,8 +164,6 @@ public class RabbitManager {
         try {
             log.info("Sending RPC message: " + message);
 
-            String replyQueueName = this.channel.queueDeclare().getQueue();
-
             String correlationId = UUID.randomUUID().toString();
 
             Map<String, Object> headers = new HashMap<>();
@@ -172,7 +173,7 @@ public class RabbitManager {
             AMQP.BasicProperties props = new AMQP.BasicProperties()
                     .builder()
                     .correlationId(correlationId)
-                    .replyTo(replyQueueName)
+                    .replyTo(durableResponseQueueName)
                     .contentType("application/json")
                     .headers(headers)
                     .build();
@@ -196,11 +197,11 @@ public class RabbitManager {
             };
 
 //            QueueingConsumer consumer = new QueueingConsumer(channel);
-            this.channel.basicConsume(replyQueueName, true, consumer);
+            this.channel.basicConsume(durableResponseQueueName, true, consumer);
 
-            String responseMsg = response.take();
 
-//            this.channel.basicPublish(exchangeName, routingKey, props, message.getBytes());
+
+            this.channel.basicPublish(exchangeName, routingKey, props, message.getBytes());
 //            while (true) {
 //                QueueingConsumer.Delivery delivery = consumer.nextDelivery(20000);
 //                if (delivery == null) {
@@ -215,6 +216,7 @@ public class RabbitManager {
 //                }
 //            }
 
+            String responseMsg = response.take();
             log.info("Response received: " + responseMsg);
             return responseMsg;
         } catch (IOException | InterruptedException e) {
