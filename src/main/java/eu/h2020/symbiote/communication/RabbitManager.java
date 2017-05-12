@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -175,25 +177,43 @@ public class RabbitManager {
                     .headers(headers)
                     .build();
 
-            QueueingConsumer consumer = new QueueingConsumer(channel);
+            final BlockingQueue<String> response = new ArrayBlockingQueue<String>(1);
+
+            DefaultConsumer consumer = new DefaultConsumer(channel) {
+                @Override
+                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                    if (properties.getCorrelationId().equals(correlationId)) {
+                        log.debug("Got reply with correlationId: " + correlationId);
+//                        responseMsg = new String(delivery.getBody());
+                        response.offer(new String(body, "UTF-8"));
+//                        getChannel().basicAck(envelope.getDeliveryTag(),false);
+                        getChannel().basicCancel(this.getConsumerTag());
+
+                    } else {
+                        log.debug("Got answer with wrong correlationId... should be " + correlationId + " but got " + properties.getCorrelationId() );
+                    }
+                }
+            };
+
+//            QueueingConsumer consumer = new QueueingConsumer(channel);
             this.channel.basicConsume(replyQueueName, true, consumer);
 
-            String responseMsg = null;
+            String responseMsg = response.take();
 
-            this.channel.basicPublish(exchangeName, routingKey, props, message.getBytes());
-            while (true) {
-                QueueingConsumer.Delivery delivery = consumer.nextDelivery(20000);
-                if (delivery == null) {
-                    log.info("Timeout in response retrieval");
-                    return null;
-                }
-
-                if (delivery.getProperties().getCorrelationId().equals(correlationId)) {
-                    log.info("Wrong correlationID in response message");
-                    responseMsg = new String(delivery.getBody());
-                    break;
-                }
-            }
+//            this.channel.basicPublish(exchangeName, routingKey, props, message.getBytes());
+//            while (true) {
+//                QueueingConsumer.Delivery delivery = consumer.nextDelivery(20000);
+//                if (delivery == null) {
+//                    log.info("Timeout in response retrieval");
+//                    return null;
+//                }
+//
+//                if (delivery.getProperties().getCorrelationId().equals(correlationId)) {
+//                    log.info("Wrong correlationID in response message");
+//                    responseMsg = new String(delivery.getBody());
+//                    break;
+//                }
+//            }
 
             log.info("Response received: " + responseMsg);
             return responseMsg;
