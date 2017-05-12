@@ -168,7 +168,8 @@ public class CoreInterfaceController {
     public ResponseEntity login(@RequestBody Credentials user) {
         log.debug("Login request");
         try {
-            return new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
+            ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
+            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
@@ -195,7 +196,8 @@ public class CoreInterfaceController {
 
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
-            return new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, entity, String.class);
+            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
@@ -211,7 +213,8 @@ public class CoreInterfaceController {
 
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
-            return new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION, entity, String.class);
+            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
