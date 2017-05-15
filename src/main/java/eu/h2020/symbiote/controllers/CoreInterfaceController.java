@@ -220,5 +220,16 @@ public class CoreInterfaceController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET,
+            value = URI_PREFIX + AAMConstants.AAM_GET_AVAILABLE_AAMS)
+    public ResponseEntity getAvailableAAMs() {
+        log.debug("Get Available AAMS request");
+        try {
+            return new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
+        } catch (HttpStatusCodeException e) {
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
 
 }
