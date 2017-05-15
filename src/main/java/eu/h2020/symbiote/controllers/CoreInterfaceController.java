@@ -225,7 +225,8 @@ public class CoreInterfaceController {
     public ResponseEntity getAvailableAAMs() {
         log.debug("Get Available AAMS request");
         try {
-            return new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
+            ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
+            return new ResponseEntity(entity.getBody(), entity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
