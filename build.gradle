@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.4.1.RELEASE'
+        springBootVersion = '1.5.3.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -29,9 +29,6 @@ repositories {
     maven { 
         url "https://jitpack.io" 
     }
-    maven {
-        url 'https://repo.spring.io/libs-snapshot'
-    }
 }
 
 sourceCompatibility = 1.8
@@ -41,7 +38,7 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-zipkin') // Causes the java.net.ConnectException
-    compile('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
+    compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
@@ -57,13 +54,12 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Camden.RELEASE"
-        mavenBom 'org.springframework.cloud:spring-cloud-sleuth:1.1.0.BUILD-SNAPSHOT'
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE"
     }
 }
 
 jacoco {
-    toolVersion = "0.7.7.201606060606"
+    toolVersion = "0.7.9"
 }
 
 jacocoTestReport {

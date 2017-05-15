@@ -169,7 +169,7 @@ public class CoreInterfaceController {
         log.debug("Login request");
         try {
             ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
-            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getStatusCode());
+            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getHeaders(), stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
