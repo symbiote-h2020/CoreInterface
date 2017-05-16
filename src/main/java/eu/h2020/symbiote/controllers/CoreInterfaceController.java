@@ -169,7 +169,7 @@ public class CoreInterfaceController {
     public ResponseEntity login(@RequestBody Credentials user) {
         log.debug("Login request");
         try {
-            ResponseEntity<String> entity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, null, String.class);
+            ResponseEntity<String> entity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
 
             HttpHeaders headers = stripTransferEndoding(entity.getHeaders());
 
