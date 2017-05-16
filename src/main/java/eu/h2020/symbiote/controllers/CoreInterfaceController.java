@@ -21,6 +21,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -168,8 +169,11 @@ public class CoreInterfaceController {
     public ResponseEntity login(@RequestBody Credentials user) {
         log.debug("Login request");
         try {
-            ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
-            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getHeaders(), stringResponseEntity.getStatusCode());
+            ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, String.class);
+
+            HttpHeaders headers = stripTransferEndoding(entity.getHeaders());
+
+            return new ResponseEntity(entity.getBody(), headers, entity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
@@ -180,7 +184,11 @@ public class CoreInterfaceController {
     public ResponseEntity getCaCert() {
         log.debug("Get CA Cert request");
         try {
-            return new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_CA_CERTIFICATE, String.class);
+            ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_CA_CERTIFICATE, String.class);
+
+            HttpHeaders headers = stripTransferEndoding(entity.getHeaders());
+
+            return new ResponseEntity(entity.getBody(), headers, entity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
@@ -197,7 +205,10 @@ public class CoreInterfaceController {
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
             ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, entity, String.class);
-            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getStatusCode());
+
+            HttpHeaders headers = stripTransferEndoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
@@ -214,7 +225,10 @@ public class CoreInterfaceController {
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
             ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION, entity, String.class);
-            return new ResponseEntity(stringResponseEntity.getBody(), stringResponseEntity.getStatusCode());
+
+            HttpHeaders headers = stripTransferEndoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
@@ -226,10 +240,30 @@ public class CoreInterfaceController {
         log.debug("Get Available AAMS request");
         try {
             ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
-            return new ResponseEntity(entity.getBody(), entity.getStatusCode());
+
+            HttpHeaders headers = stripTransferEndoding(entity.getHeaders());
+
+            return new ResponseEntity(entity.getBody(), headers, entity.getStatusCode());
         } catch (HttpStatusCodeException e) {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
+    }
+
+    private HttpHeaders stripTransferEndoding(HttpHeaders headers){
+        if (headers == null)
+            return null;
+
+        HttpHeaders newHeaders = new HttpHeaders();
+
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()){
+            if (!entry.getKey().equals(HttpHeaders.TRANSFER_ENCODING)){
+                for (String value : entry.getValue())
+                    newHeaders.add(entry.getKey(), value);
+            }
+
+        }
+
+        return newHeaders;
     }
 
 
