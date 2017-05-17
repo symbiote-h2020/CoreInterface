@@ -4,7 +4,9 @@ import eu.h2020.symbiote.communication.RabbitManager;
 import eu.h2020.symbiote.controllers.CoreInterfaceController;
 import eu.h2020.symbiote.core.ci.QueryResourceResult;
 import eu.h2020.symbiote.core.ci.QueryResponse;
+import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
+import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +15,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.notNull;
@@ -152,6 +157,47 @@ public class CoreInterfaceControllerTests {
         assertEquals(3, ((Map) response.getBody()).size());
     }
 
+    @Test
+    public void testSparqlQuery_timeout() {
+        RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
+        when(rabbitManager.sendSparqlSearchRequest((CoreSparqlQueryRequest) notNull())).thenReturn(null);
+
+        CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
+
+        ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(), null);
+
+        assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    public void testSparqlQuery_emptyResults() {
+        RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
+        when(rabbitManager.sendSparqlSearchRequest((CoreSparqlQueryRequest) notNull())).thenReturn(new String());
+
+        CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
+
+        ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(),null);
+
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertTrue(response.getBody() instanceof String);
+        assertEquals(0, ((String) response.getBody()).length());
+    }
+
+    @Test
+    public void testSparqlQuery_3results() {
+        RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
+        String rdfResources = "RDF resources";
+
+        when(rabbitManager.sendSparqlSearchRequest((CoreSparqlQueryRequest) notNull())).thenReturn(rdfResources);
+
+        CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
+
+        ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(), null);
+
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertTrue(response.getBody() instanceof String);
+        assertEquals(13, ((String) response.getBody()).length());
+    }
 
 }
 

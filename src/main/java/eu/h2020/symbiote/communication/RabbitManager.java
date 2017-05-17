@@ -90,7 +90,6 @@ public class RabbitManager {
 
     private Connection connection;
     private Channel channel;
-//    private String durableResponseQueueName;
 
     /**
      * Method used to initialise RabbitMQ connection and declare all required exchanges.
@@ -122,8 +121,6 @@ public class RabbitManager {
                     this.cramExchangeAutodelete,
                     this.cramExchangeInternal,
                     null);
-
-//            this.durableResponseQueueName = this.channel.queueDeclare("symbIoTe-CoreInterface-rpcReplyQueue",true,true,false,null).getQueue();
 
         } catch (IOException | TimeoutException e) {
             log.error(e.getMessage(), e);
@@ -179,24 +176,6 @@ public class RabbitManager {
                     .contentType("application/json")
                     .headers(headers)
                     .build();
-
-//            final BlockingQueue<String> response = new ArrayBlockingQueue<String>(1);
-//
-//            DefaultConsumer consumer = new DefaultConsumer(channel) {
-//                @Override
-//                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//                    if (properties.getCorrelationId().equals(correlationId)) {
-//                        log.debug("Got reply with correlationId: " + correlationId);
-////                        responseMsg = new String(delivery.getBody());
-//                        response.offer(new String(body, "UTF-8"));
-////                        getChannel().basicAck(envelope.getDeliveryTag(),false);
-//                        getChannel().basicCancel(this.getConsumerTag());
-//
-//                    } else {
-//                        log.debug("Got answer with wrong correlationId... should be " + correlationId + " but got " + properties.getCorrelationId() );
-//                    }
-//                }
-//            };
 
             this.channel.basicConsume(replyQueueName, true, consumer);
 
@@ -297,10 +276,7 @@ public class RabbitManager {
             log.info("Request for resource sparql query");
             ObjectMapper mapper = new ObjectMapper();
             String message = mapper.writeValueAsString(request);
-            String response = sendRpcMessage(this.resourceExchangeName, this.resourceSparqlSearchRequestedRoutingKey, message, request.getClass().getCanonicalName());
-            if (response == null)
-                return null;
-            return mapper.readValue(response, String.class);
+            return sendRpcMessage(this.resourceExchangeName, this.resourceSparqlSearchRequestedRoutingKey, message, request.getClass().getCanonicalName());
         } catch (IOException e) {
             log.error(CORE_PARSE_ERROR_MSG, e);
         }

@@ -3,6 +3,7 @@ package eu.h2020.symbiote;
 import eu.h2020.symbiote.communication.RabbitManager;
 import eu.h2020.symbiote.core.ci.QueryResponse;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
+import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -134,6 +135,47 @@ public class RabbitManagerTests {
         assertEquals("res1", response.getResources().get(0).getName());
         assertEquals("res2", response.getResources().get(1).getName());
         assertEquals("res3", response.getResources().get(2).getName());
+    }
+
+    @Test
+    public void testSendSparqlSearchRequest_timeout() {
+        RabbitManager rabbitManager = spy(new RabbitManager());
+
+        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+
+        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+        String response = rabbitManager.sendSparqlSearchRequest(request);
+
+        assertNull(response);
+
+    }
+
+    @Test
+    public void testSendSparqlSearchRequest_emptyResult() {
+        RabbitManager rabbitManager = spy(new RabbitManager());
+
+        doReturn("").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+
+        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+        String response = rabbitManager.sendSparqlSearchRequest(request);
+
+        assertNotNull(response);
+        assertEquals(0, response.length());
+    }
+
+    @Test
+    public void testSendSparqlSearchRequest_3results() {
+        RabbitManager rabbitManager = spy(new RabbitManager());
+
+        String rdfResponse = "RDF resources";
+
+        doReturn(rdfResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+
+        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+        String response = rabbitManager.sendSparqlSearchRequest(request);
+
+        assertNotNull(response);
+        assertEquals(13, response.length());
     }
 
 

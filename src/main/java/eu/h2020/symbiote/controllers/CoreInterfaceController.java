@@ -34,6 +34,7 @@ import java.util.Map;
 @CrossOrigin
 public class CoreInterfaceController {
     private static final String URI_PREFIX = "/coreInterface/v1";
+    private static final String ERROR_PROXY_STATUS_MSG = "Error status code in proxy communication: ";
 
     public static final Log log = LogFactory.getLog(CoreInterfaceController.class);
 
@@ -70,6 +71,8 @@ public class CoreInterfaceController {
      * @param max_distance      maximal distance from specified resource latitude and longitude (in meters)
      * @param observed_property property observed by resource; can be set multiple times to indicate more than one
      *                          observed property
+     * @param resource_type     type of queried resource
+     * @param token             security token
      * @return query result as body or null along with appropriate error HTTP status code
      */
     @RequestMapping(method = RequestMethod.GET,
@@ -147,6 +150,7 @@ public class CoreInterfaceController {
      * querying for URLs Interworking Services of resources of specified IDs.
      *
      * @param resourceId ID of a resource to get Interworking Interface URL; multiple IDs can be passed
+     * @param token      security token
      * @return map containing entries in a form of {"resourceId1":"InterworkingInterfaceUrl1", "resourceId2":"InterworkingInterface2", ... }
      */
     @RequestMapping(method = RequestMethod.GET,
@@ -164,6 +168,12 @@ public class CoreInterfaceController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Endpoint for logging in to symbIoTe Core to obtain security token.
+     *
+     * @param user user credentials
+     * @return empty response with security token filled in header field
+     */
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + AAMConstants.AAM_LOGIN)
     public ResponseEntity login(@RequestBody Credentials user) {
@@ -171,14 +181,21 @@ public class CoreInterfaceController {
         try {
             ResponseEntity<String> entity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
 
-            HttpHeaders headers = stripTransferEndoding(entity.getHeaders());
+            HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
-            return new ResponseEntity(entity.getBody(), headers, entity.getStatusCode());
+            return new ResponseEntity<>(entity.getBody(), headers, entity.getStatusCode());
         } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
+    /**
+     * Endpoint for reading CA certificate.
+     *
+     * @return CA certificate
+     */
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + AAMConstants.AAM_GET_CA_CERTIFICATE)
     public ResponseEntity getCaCert() {
@@ -186,14 +203,22 @@ public class CoreInterfaceController {
         try {
             ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_CA_CERTIFICATE, String.class);
 
-            HttpHeaders headers = stripTransferEndoding(entity.getHeaders());
+            HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
-            return new ResponseEntity(entity.getBody(), headers, entity.getStatusCode());
+            return new ResponseEntity<>(entity.getBody(), headers, entity.getStatusCode());
         } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
+    /**
+     * Endpoint for requesting foreign token.
+     *
+     * @param token security token
+     * @return foreign token
+     */
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN)
     public ResponseEntity requestForeignToken(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
@@ -206,14 +231,22 @@ public class CoreInterfaceController {
 
             ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, entity, String.class);
 
-            HttpHeaders headers = stripTransferEndoding(stringResponseEntity.getHeaders());
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
-            return new ResponseEntity(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
+    /**
+     * Endpoint for checking token revocation.
+     *
+     * @param token security token
+     * @return status of token
+     */
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION)
     public ResponseEntity checkHomeTokenRevocation(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
@@ -226,14 +259,21 @@ public class CoreInterfaceController {
 
             ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION, entity, String.class);
 
-            HttpHeaders headers = stripTransferEndoding(stringResponseEntity.getHeaders());
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
-            return new ResponseEntity(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
         } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
+    /**
+     * Endpoint for listing available AAM instances.
+     *
+     * @return list of available AAM instances
+     */
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + AAMConstants.AAM_GET_AVAILABLE_AAMS)
     public ResponseEntity getAvailableAAMs() {
@@ -241,22 +281,30 @@ public class CoreInterfaceController {
         try {
             ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
 
-            HttpHeaders headers = stripTransferEndoding(entity.getHeaders());
+            HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
-            return new ResponseEntity(entity.getBody(), headers, entity.getStatusCode());
+            return new ResponseEntity<>(entity.getBody(), headers, entity.getStatusCode());
         } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
 
-    private HttpHeaders stripTransferEndoding(HttpHeaders headers){
+    /**
+     * Method used to strip 'Transfer-encoding' header and use 'Content-length' instead.
+     *
+     * @param headers headers to strip 'Transfer-encoding' from
+     * @return headers without 'Transfer-encoding' field
+     */
+    private HttpHeaders stripTransferEncoding(HttpHeaders headers) {
         if (headers == null)
             return null;
 
         HttpHeaders newHeaders = new HttpHeaders();
 
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()){
-            if (!entry.getKey().equals(HttpHeaders.TRANSFER_ENCODING)){
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            if (!entry.getKey().equals(HttpHeaders.TRANSFER_ENCODING)) {
                 for (String value : entry.getValue())
                     newHeaders.add(entry.getKey(), value);
             }
