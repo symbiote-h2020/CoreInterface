@@ -14,39 +14,66 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.owasp:dependency-check-gradle:1.4.5.1")
+        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.2.1'
         classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
         classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.10.1")
-        classpath 'io.github.swagger2markup:swagger2markup-spring-restdocs-ext:1.2.0'
+        classpath("io.github.swagger2markup:swagger2markup-spring-restdocs-ext:1.2.0")
         classpath("io.github.swagger2markup:swagger2markup-gradle-plugin:1.2.0")
-        // classpath "org.ajoberstar:gradle-git:1.5.1
     }
 }
 
-ext.junitJupiterVersion = '5.0.0-M2'
-
+// code
+apply plugin: "io.spring.dependency-management"
 apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
+// code quality
+apply plugin: 'jacoco'
+apply plugin: 'org.owasp.dependencycheck'
+
+// IDEs
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'jacoco'
+
+// publishing
+apply plugin: 'com.cinnober.gradle.semver-git'
+
+// documentation
 apply plugin: 'org.asciidoctor.convert'
 apply plugin: 'io.github.swagger2markup'
 
-jar {
-    baseName = 'CoreInterface'
-    version =  '0.0.2'
-}
-
-repositories {
-    mavenCentral()
-    jcenter()
-    maven {
-        url "https://jitpack.io" 
-    }
-}
+// XXX please change with your commits according to http://semver.org/
+project.version = '0.2.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+// dependencies section
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    maven { url "https://jitpack.io" }
+}
+
+// Spring related configs
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE"
+    }
+}
+
+/*
+Forces dependencies' cache invalidation for each build for dependencies marked with
+    { changing = true }
+    e.g.
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT'){ changing = true }
+ */
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
 
 dependencies {
 
@@ -64,31 +91,33 @@ dependencies {
     // compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') { changing = true }
     compile('com.github.symbiote-h2020:SymbIoTeLibraries:0.2.0')
 
-    
+    // Spring
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
-    compile('org.springframework.cloud:spring-cloud-starter-zipkin') // Causes the java.net.ConnectException
+    compile('org.springframework.cloud:spring-cloud-starter-zipkin')
     compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+
+    // Swagger annotations for documentation
     compile("io.swagger:swagger-annotations:${swaggerAnnotationsVersion}")
 
-    // Use JUnit4
+    // Tests only
     testCompile('junit:junit:4.12')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile("io.springfox:springfox-swagger2:${springfoxVersion}")
     testCompile("io.springfox:springfox-bean-validators:${springfoxVersion}")
     testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
-    // testCompile 'com.fasterxml.jackson.module:jackson-module-jsonSchema:2.6.5'
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE"
-    }
+// code quality below
+task generateJavaDocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+    destinationDir = reporting.file("javadocs")
 }
 
+// jacoco configuration section
 jacoco {
     toolVersion = "0.7.9"
 }
@@ -100,7 +129,13 @@ jacocoTestReport {
     }
 }
 
-check.dependsOn jacocoTestReport
+// owasp config
+dependencyCheck {
+    outputDirectory = "build/reports/security"
+}
+
+// including code quality extensions into the build
+check.dependsOn(jacocoTestReport, 'dependencyCheck')
 
 test {
     systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
