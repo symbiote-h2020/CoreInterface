@@ -1,12 +1,25 @@
 buildscript {
     ext {
         springBootVersion = '1.5.3.RELEASE'
+        asciiDocOutputDir = file("${buildDir}/asciidoc/generated")
+        swaggerOutputDir = file("${buildDir}/swagger")
+        // snippetsOutputDir = file("${buildDir}/asciidoc/snippets")
+        springfoxVersion = '2.7.0'
+        swaggerAnnotationsVersion = '1.5.13'
     }
     repositories {
         mavenCentral()
+        jcenter()
+        maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
+        classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.10.1")
+        // classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE'
+        // classpath 'io.github.swagger2markup:swagger2markup-spring-restdocs-ext:1.2.0'
+        classpath("io.github.swagger2markup:swagger2markup-gradle-plugin:1.2.0")
+        // classpath "org.ajoberstar:gradle-git:1.5.1
     }
 }
 
@@ -15,9 +28,10 @@ ext.junitJupiterVersion = '5.0.0-M2'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 apply plugin: 'jacoco'
-
+apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'io.github.swagger2markup'
 
 jar {
     baseName = 'CoreInterface'
@@ -26,7 +40,8 @@ jar {
 
 repositories {
     mavenCentral()
-    maven { 
+    jcenter()
+    maven {
         url "https://jitpack.io" 
     }
 }
@@ -58,12 +73,15 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-
+    compile("io.swagger:swagger-annotations:${swaggerAnnotationsVersion}")
 
     // Use JUnit4
-    testCompile 'junit:junit:4.12'
+    testCompile('junit:junit:4.12')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile("io.springfox:springfox-swagger2:${springfoxVersion}")
+    testCompile("io.springfox:springfox-bean-validators:${springfoxVersion}")
+    // testCompile 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    // testCompile 'com.fasterxml.jackson.module:jackson-module-jsonSchema:2.6.5'
 }
 
 dependencyManagement {
@@ -84,3 +102,35 @@ jacocoTestReport {
 }
 
 check.dependsOn jacocoTestReport
+
+test {
+    systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
+    // systemProperty 'io.springfox.staticdocs.snippetsOutputDir', snippetsOutputDir
+}
+
+convertSwagger2markup {
+    dependsOn test
+    swaggerInput "${swaggerOutputDir}/swagger.json"
+    outputDir asciiDocOutputDir
+    config = [
+            'swagger2markup.pathsGroupedBy' : 'TAGS']//,
+            // 'swagger2markup.extensions.springRestDocs.snippetBaseUri': snippetsOutputDir.getAbsolutePath()]
+}
+
+asciidoctor {
+    dependsOn convertSwagger2markup
+    sources {
+        include 'index.adoc'
+    }
+    backends = ['html5', 'pdf']
+    attributes = [
+            doctype: 'book',
+            toc: 'left',
+            toclevels: '3',
+            numbered: '',
+            sectlinks: '',
+            sectanchors: '',
+            hardbreaks: '',
+            generated: asciiDocOutputDir
+    ]
+}

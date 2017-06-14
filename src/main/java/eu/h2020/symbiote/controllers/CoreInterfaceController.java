@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.annotations.*;
+
 /**
  * Class defining all REST endpoints.
  * <p>
@@ -32,6 +34,7 @@ import java.util.Map;
  */
 @RestController
 @CrossOrigin
+@Api(tags = "Core Interface Controller", description = "Operations of Core Interface Controller")
 public class CoreInterfaceController {
     private static final String URI_PREFIX = "/coreInterface/v1";
     private static final String ERROR_PROXY_STATUS_MSG = "Error status code in proxy communication: ";
@@ -77,19 +80,24 @@ public class CoreInterfaceController {
      */
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/query")
-    public ResponseEntity query(@RequestParam(value = "platform_id", required = false) String platformId,
-                                @RequestParam(value = "platform_name", required = false) String platformName,
-                                @RequestParam(value = "owner", required = false) String owner,
-                                @RequestParam(value = "name", required = false) String name,
-                                @RequestParam(value = "id", required = false) String id,
-                                @RequestParam(value = "description", required = false) String description,
-                                @RequestParam(value = "location_name", required = false) String location_name,
-                                @RequestParam(value = "location_lat", required = false) Double location_lat,
-                                @RequestParam(value = "location_long", required = false) Double location_long,
-                                @RequestParam(value = "max_distance", required = false) Integer max_distance,
-                                @RequestParam(value = "observed_property", required = false) String[] observed_property,
-                                @RequestParam(value = "resource_type", required = false) String resource_type,
-                                @RequestHeader("X-Auth-Token") String token) {
+    @ApiOperation(value = "HTTP GET query",
+            notes = "Search for resources using HTTP GET. The parameters that can be used for such a query are static and defined below",
+            response = QueryResponse.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = "Resource Not Found") })
+    public ResponseEntity query(@ApiParam(value = "The id of the platform owning the resource") @RequestParam(value = "platform_id", required = false) String platformId,
+                                @ApiParam(value = "The name of the platform owning the resources") @RequestParam(value = "platform_name", required = false) String platformName,
+                                @ApiParam(value = "The owner of the resource") @RequestParam(value = "owner", required = false) String owner,
+                                @ApiParam(value = "The name of the resource") @RequestParam(value = "name", required = false) String name,
+                                @ApiParam(value = "The id of the resource") @RequestParam(value = "id", required = false) String id,
+                                @ApiParam(value = "The description of the resource") @RequestParam(value = "description", required = false) String description,
+                                @ApiParam(value = "The location name of the resource") @RequestParam(value = "location_name", required = false) String location_name,
+                                @ApiParam(value = "The latitude of the resource") @RequestParam(value = "location_lat", required = false) Double location_lat,
+                                @ApiParam(value = "The longitude of the resource") @RequestParam(value = "location_long", required = false) Double location_long,
+                                @ApiParam(value = "The maximum distance from the resource") @RequestParam(value = "max_distance", required = false) Integer max_distance,
+                                @ApiParam(value = "The observed properties of the resource") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                @ApiParam(value = "The resource type") @RequestParam(value = "resource_type", required = false) String resource_type,
+                                @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming") @RequestHeader("X-Auth-Token") String token) {
 
         CoreQueryRequest queryRequest = new CoreQueryRequest();
         queryRequest.setPlatform_id(platformId);
