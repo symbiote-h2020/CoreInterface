@@ -1,16 +1,16 @@
 package eu.h2020.symbiote;
 
 import eu.h2020.symbiote.communication.RabbitManager;
-import eu.h2020.symbiote.model.QueryRequest;
-import eu.h2020.symbiote.model.Resource;
-import eu.h2020.symbiote.model.ResourceUrlsRequest;
+import eu.h2020.symbiote.core.ci.QueryResponse;
+import eu.h2020.symbiote.core.internal.CoreQueryRequest;
+import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
+import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -23,7 +23,7 @@ public class RabbitManagerTests {
     public void testSendResourceUrls_timeout() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Collections.singletonList("123"));
@@ -37,7 +37,7 @@ public class RabbitManagerTests {
     public void testSendResourceUrls_emptyList() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn("{}").when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn("{}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList("123", "abc", "xyz"));
@@ -62,7 +62,7 @@ public class RabbitManagerTests {
                 "}";
 
 
-        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList("123", "abc", "xyz"));
@@ -84,10 +84,10 @@ public class RabbitManagerTests {
     public void testSendSearchRequest_timeout() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
-        QueryRequest request = new QueryRequest();
-        List<Resource> response = rabbitManager.sendSearchRequest(request);
+        CoreQueryRequest request = new CoreQueryRequest();
+        QueryResponse response = rabbitManager.sendSearchRequest(request);
 
         assertNull(response);
 
@@ -97,14 +97,13 @@ public class RabbitManagerTests {
     public void testSendSearchRequest_emptyResult() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn("[]").when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn("{\"resources\":[]}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
-        QueryRequest request = new QueryRequest();
-        List<Resource> response = rabbitManager.sendSearchRequest(request);
+        CoreQueryRequest request = new CoreQueryRequest();
+        QueryResponse response = rabbitManager.sendSearchRequest(request);
 
         assertNotNull(response);
-        assertTrue(response instanceof List);
-        assertEquals(0, response.size());
+        assertEquals(0, response.getResources().size());
     }
 
     @Test
@@ -112,7 +111,8 @@ public class RabbitManagerTests {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
         String jsonResponse = new String();
-        jsonResponse += "[" +
+        jsonResponse += "{" +
+                "\"resources\":[" +
                 "{" +
                 "\"name\" : \"res1\"" +
                 "}," +
@@ -122,19 +122,60 @@ public class RabbitManagerTests {
                 "{" +
                 "\"name\" : \"res3\"" +
                 "}" +
-                "]";
+                "]" +
+                "}";
 
-        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any());
+        doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
-        QueryRequest request = new QueryRequest();
-        List<Resource> response = rabbitManager.sendSearchRequest(request);
+        CoreQueryRequest request = new CoreQueryRequest();
+        QueryResponse response = rabbitManager.sendSearchRequest(request);
 
         assertNotNull(response);
-        assertTrue(response instanceof List);
-        assertEquals(3, response.size());
-        assertEquals("res1", response.get(0).getName());
-        assertEquals("res2", response.get(1).getName());
-        assertEquals("res3", response.get(2).getName());
+        assertEquals(3, response.getResources().size());
+        assertEquals("res1", response.getResources().get(0).getName());
+        assertEquals("res2", response.getResources().get(1).getName());
+        assertEquals("res3", response.getResources().get(2).getName());
+    }
+
+    @Test
+    public void testSendSparqlSearchRequest_timeout() {
+        RabbitManager rabbitManager = spy(new RabbitManager());
+
+        doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+
+        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+        String response = rabbitManager.sendSparqlSearchRequest(request);
+
+        assertNull(response);
+
+    }
+
+    @Test
+    public void testSendSparqlSearchRequest_emptyResult() {
+        RabbitManager rabbitManager = spy(new RabbitManager());
+
+        doReturn("").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+
+        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+        String response = rabbitManager.sendSparqlSearchRequest(request);
+
+        assertNotNull(response);
+        assertEquals(0, response.length());
+    }
+
+    @Test
+    public void testSendSparqlSearchRequest_3results() {
+        RabbitManager rabbitManager = spy(new RabbitManager());
+
+        String rdfResponse = "RDF resources";
+
+        doReturn(rdfResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+
+        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+        String response = rabbitManager.sendSparqlSearchRequest(request);
+
+        assertNotNull(response);
+        assertEquals(13, response.length());
     }
 
 

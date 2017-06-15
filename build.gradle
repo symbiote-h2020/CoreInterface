@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.4.1.RELEASE'
+        springBootVersion = '1.5.3.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -21,7 +21,7 @@ apply plugin: 'jacoco'
 
 jar {
     baseName = 'CoreInterface'
-    version =  '0.0.1'
+    version =  '0.0.2'
 }
 
 repositories {
@@ -29,19 +29,32 @@ repositories {
     maven { 
         url "https://jitpack.io" 
     }
-    maven {
-        url 'https://repo.spring.io/libs-snapshot'
-    }
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+
+    /* SymbIoTeLibraries manual:
+        One can use the library from jitpack by default with the notation:
+            compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') {changing = true }
+        or having cloned locally the SymbIoTeLibraries repo use it directly with project dependency by:
+            compile project(':SymbIoTeLibraries')
+        Important --- In order to use the latter you need to:
+            1) switch comments on the artifact and project dependencies
+            2) always have only one uncommented
+            3) project dependency requires changes in settings.gradle file in this project
+            4) never commit build.gradle which has project dependencies active as it will break CI builds
+    */
+    // compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') { changing = true }
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:0.2.0')
+
+    
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-zipkin') // Causes the java.net.ConnectException
-    compile('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
+    compile('org.springframework.boot:spring-boot-starter-amqp')
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
@@ -55,13 +68,12 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Camden.RELEASE"
-        mavenBom 'org.springframework.cloud:spring-cloud-sleuth:1.1.0.BUILD-SNAPSHOT'
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE"
     }
 }
 
 jacoco {
-    toolVersion = "0.7.7.201606060606"
+    toolVersion = "0.7.9"
 }
 
 jacocoTestReport {

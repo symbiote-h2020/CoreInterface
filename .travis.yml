@@ -1,7 +1,8 @@
 language: java
 env:
   global:
-    secure: vJgYQDQ4vWPRtbIx1rC/iR8PwbBLtWbVTx+kTvYRTMC68SgvWHnp3q+lxherX//19etUwbYb3iSPuzuoAL8XUka7Qd+DVl6xYTQPHJBk5tuod+JUMhuV2M28VQhEu/bRN3LSnRR03MYHPZK9/VRN9NPh6hx+HiqAYe+Xz9uoQW7PMJmsKYjFW0rUcadmjlh5c6n3QoiEmDZtbTwIpjfsGwgP2l3YAGeeB5zih8RGq83E6R8SoTRasLlKk6mD6uhbeOJKznHQRxXaCi9P/EsDZTxGFKZDPsJeuI5TJTXeRIu+GTavvIVWkCvGefL09UFgJfR3xoivUe31VjyEGEd3SXe71zpz0kK6RCTr/sG/m2qmRNpsAZlCgYU6jZf9bWOQr7g9uRTiF10bDwZxJO+LgU9Ru+MzfB42DZ1zUTMFiFM00D/oaV1yoSgE7qx6AcULM0sYn+pr772bCrz3CBVsQKqkGUQQs/cuODJecwTBWzx66lajfeRbpZCY/0bFzJj76EHgD+aNWogkcVoLBrMXe4GC/p6Xj21Po5g4Frxk3gE69IjeQ2FmFT3OVyVaH6eJM8UNxa9bX11M28E1rU7+BMp1K7YBukxTKuy6ILxUvu2L+tNMPoOf1hniaKTYloEQtTpZCABmKnDfiiym+ZdREufSZQ4j+LckgexxKhs1pk4=
+  - GITHUB_REPO=symbiote-h2020/CoreInterface
+  - secure: 7qeYvB3nDgS1mHMWiN6gCpo1a68BNFI7xfFpBH+sdYHdLA9gt2kBOn+zkpj8gSSxzXHMTcZNaRKaboJbGxJBUuOYruxIR7v18VrfpMsWmBmWSr6H0TFGyLJpPpYjMEaR2cV7hDebvscMBWtjURdt4yZMHqQyaRXWGSlylOEQF8eZYTK4D8hm3MF6tjXEP8ZMWuc5N87YOJBJ5xeAJTfZ6D2UPvJThkqn3Pvs1Juuyjsz1EsWrMAhCeiNYviDJ9/N8Ng0lo57k4cHJWZRPTzROERYEu+cMezNlRRP6agGj1EtbzAQROnjpUL8OwTU6vjBoH/FK8ABFVeYs/NFNQzrFDbXuMvdxBP+HdEi/q65GfmYGKqFMbdae1YHaJY3S545/J86LR02TviOkaQIFQvGkF1zQfJTEL+lA1YIaEuwJKr9mz9PaM5YY83ztBLBWqOdmIMy6PcQQMQ3kf0H0C+DgVKc1mK9myqW/+lIMPrz66wOtLnQdhX9zr/NJ//HnMpHjyVHcj1YRRddhkQcLM1bgVM6Edr4eyunmLlMe4VA+2QUBf0STWmjU+ChL/KdAD3jkWLrLFUtU97h5kEPnc1GTevZptCfMOfVO6kCpxtnC6/9oMPERiRexLMTdU7N90tAEm0p0bX1cQBHBEvuMKczihAhLCJM4xYuFZd2J9Pwdo4=
 jdk:
 - oraclejdk8
 services:
@@ -11,6 +12,7 @@ sudo: required
 branches:
   only:
   - staging
+install: true
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -18,8 +20,15 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
-after_success:
+before_script:
 - chmod a+x merge_script.sh
-- BRANCHES_TO_MERGE_REGEX='staging' BRANCH_TO_MERGE_INTO=develop GITHUB_REPO=symbiote-h2020/CoreInterface
-  ./merge_script.sh
+- "./merge_script.sh"
+- gradle clean --refresh-dependencies
+after_success:
+- chmod a+x pushing_script.sh
+- "./pushing_script.sh"
 - bash <(curl -s https://codecov.io/bash)
+notifications:
+  email:
+    on_success: never
+    on_failure: always
