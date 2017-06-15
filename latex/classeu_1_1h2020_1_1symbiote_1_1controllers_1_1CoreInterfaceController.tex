@@ -7,7 +7,7 @@ Collaboration diagram for eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\
 \begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=230pt]{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController__coll__graph}
+\includegraphics[width=240pt]{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController__coll__graph}
 \end{center}
 \end{figure}
 \subsection*{Public Member Functions}
@@ -15,17 +15,27 @@ Collaboration diagram for eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\
 \item 
 \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}{Core\+Interface\+Controller} (\hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager}{Rabbit\+Manager} rabbit\+Manager)
 \item 
-Response\+Entity$<$?$>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77e06f47bb9cea92496704aae1b88b86}{query} (@Request\+Param(value=\char`\"{}platform\+\_\+id\char`\"{}, required=false) String platform\+Id,@Request\+Param(value=\char`\"{}platform\+\_\+name\char`\"{}, required=false) String platform\+Name,@Request\+Param(value=\char`\"{}owner\char`\"{}, required=false) String owner,@Request\+Param(value=\char`\"{}name\char`\"{}, required=false) String name,@Request\+Param(value=\char`\"{}id\char`\"{}, required=false) String id,@Request\+Param(value=\char`\"{}description\char`\"{}, required=false) String description,@Request\+Param(value=\char`\"{}location\+\_\+name\char`\"{}, required=false) String location\+\_\+name,@Request\+Param(value=\char`\"{}location\+\_\+lat\char`\"{}, required=false) Double location\+\_\+lat,@Request\+Param(value=\char`\"{}location\+\_\+long\char`\"{}, required=false) Double location\+\_\+long,@Request\+Param(value=\char`\"{}max\+\_\+distance\char`\"{}, required=false) Integer max\+\_\+distance,@Request\+Param(value=\char`\"{}observed\+\_\+property\char`\"{}, required=false) String\mbox{[}$\,$\mbox{]} observed\+\_\+property)
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_aa3f7d2db7a96024ca0cefdef1dbe13fa}{query} (@Request\+Param(value=\char`\"{}platform\+\_\+id\char`\"{}, required=false) String platform\+Id, @Request\+Param(value=\char`\"{}platform\+\_\+name\char`\"{}, required=false) String platform\+Name, @Request\+Param(value=\char`\"{}owner\char`\"{}, required=false) String owner, @Request\+Param(value=\char`\"{}name\char`\"{}, required=false) String name, @Request\+Param(value=\char`\"{}id\char`\"{}, required=false) String id, @Request\+Param(value=\char`\"{}description\char`\"{}, required=false) String description, @Request\+Param(value=\char`\"{}location\+\_\+name\char`\"{}, required=false) String location\+\_\+name, @Request\+Param(value=\char`\"{}location\+\_\+lat\char`\"{}, required=false) Double location\+\_\+lat, @Request\+Param(value=\char`\"{}location\+\_\+long\char`\"{}, required=false) Double location\+\_\+long, @Request\+Param(value=\char`\"{}max\+\_\+distance\char`\"{}, required=false) Integer max\+\_\+distance, @Request\+Param(value=\char`\"{}observed\+\_\+property\char`\"{}, required=false) String\mbox{[}$\,$\mbox{]} observed\+\_\+property, @Request\+Param(value=\char`\"{}resource\+\_\+type\char`\"{}, required=false) String resource\+\_\+type, @Request\+Header(\char`\"{}X-\/Auth-\/Token\char`\"{}) String token)
 \item 
-Response\+Entity$<$?$>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_adfa6e88c052cd6e8978294588fe116d5}{sparql\+Query} (@Request\+Body String sparql\+Query)
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a7ee735ef5179a5877209ae270e7f8465}{sparql\+Query} (@Request\+Body Sparql\+Query\+Request sparql\+Query, @Request\+Header(\char`\"{}X-\/Auth-\/Token\char`\"{}) String token)
 \item 
-Response\+Entity$<$?$>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a11f9875a81bc3f2a8150b1fb12285ce4}{get\+Resource\+Urls} (@Request\+Param(\char`\"{}id\char`\"{}) String\mbox{[}$\,$\mbox{]} resource\+Id)
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77926783c29213efb03dee68ca69f3d4}{get\+Resource\+Urls} (@Request\+Param(\char`\"{}id\char`\"{}) String\mbox{[}$\,$\mbox{]} resource\+Id, @Request\+Header(\char`\"{}X-\/Auth-\/Token\char`\"{}) String token)
+\item 
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_ae47382b47714db8cd0e659b30774355d}{login} (@Request\+Body Credentials user)
+\item 
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_aca68318d41a4eb6990ecb13e147653d2}{get\+Ca\+Cert} ()
+\item 
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a779ecc60765fc72199347821fd462dae}{request\+Foreign\+Token} (@Request\+Header(A\+A\+M\+Constants.\+T\+O\+K\+E\+N\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+N\+A\+ME) String token)
+\item 
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_ac07cffccf754e22b3eda120b9b8d0abf}{check\+Home\+Token\+Revocation} (@Request\+Header(A\+A\+M\+Constants.\+T\+O\+K\+E\+N\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+N\+A\+ME) String token)
+\item 
+Response\+Entity \hyperlink{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a3b2da4979d936efcbc913770dfd2c0e3}{get\+Available\+A\+A\+Ms} ()
 \end{DoxyCompactItemize}
 \subsection*{Static Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
-static Log {\bfseries log} = Log\+Factory.\+get\+Log(Core\+Interface\+Controller.\+class)\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a0890e1d907ac6cfdd976c53c5cdb5743}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a0890e1d907ac6cfdd976c53c5cdb5743}
-
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a38ded593a0e227a23d4f3a711d005cd2}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a38ded593a0e227a23d4f3a711d005cd2}} 
+static final Log {\bfseries log} = Log\+Factory.\+get\+Log(Core\+Interface\+Controller.\+class)
 \end{DoxyCompactItemize}
 
 
@@ -35,13 +45,12 @@ Class defining all R\+E\+ST endpoints.
 Core\+Interface, as the name suggests, is just an interface, therefore it forwards all requests to modules responsible for handling them via Rabbit\+MQ. 
 
 \subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}} 
 \index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!Core\+Interface\+Controller@{Core\+Interface\+Controller}}
 \index{Core\+Interface\+Controller@{Core\+Interface\+Controller}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
-\subsubsection[{\texorpdfstring{Core\+Interface\+Controller(\+Rabbit\+Manager rabbit\+Manager)}{CoreInterfaceController(RabbitManager rabbitManager)}}]{\setlength{\rightskip}{0pt plus 5cm}eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+Core\+Interface\+Controller (
-\begin{DoxyParamCaption}
-\item[{{\bf Rabbit\+Manager}}]{rabbit\+Manager}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a58b26a72b6964d21f04c7f680640dcce}
+\subsubsection{\texorpdfstring{Core\+Interface\+Controller()}{CoreInterfaceController()}}
+{\footnotesize\ttfamily eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+Core\+Interface\+Controller (\begin{DoxyParamCaption}\item[{\hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager}{Rabbit\+Manager}}]{rabbit\+Manager }\end{DoxyParamCaption})}
+
 Class constructor which autowires Rabbit\+Manager bean.
 
 
@@ -52,42 +61,86 @@ Class constructor which autowires Rabbit\+Manager bean.
 
 
 \subsection{Member Function Documentation}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_ac07cffccf754e22b3eda120b9b8d0abf}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_ac07cffccf754e22b3eda120b9b8d0abf}} 
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!check\+Home\+Token\+Revocation@{check\+Home\+Token\+Revocation}}
+\index{check\+Home\+Token\+Revocation@{check\+Home\+Token\+Revocation}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection{\texorpdfstring{check\+Home\+Token\+Revocation()}{checkHomeTokenRevocation()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+check\+Home\+Token\+Revocation (\begin{DoxyParamCaption}\item[{@Request\+Header(A\+A\+M\+Constants.\+T\+O\+K\+E\+N\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+N\+A\+ME) String}]{token }\end{DoxyParamCaption})}
+
+Endpoint for checking token revocation.
+
+
+\begin{DoxyParams}{Parameters}
+{\em token} & security token \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+status of token 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a3b2da4979d936efcbc913770dfd2c0e3}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a3b2da4979d936efcbc913770dfd2c0e3}} 
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!get\+Available\+A\+A\+Ms@{get\+Available\+A\+A\+Ms}}
+\index{get\+Available\+A\+A\+Ms@{get\+Available\+A\+A\+Ms}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection{\texorpdfstring{get\+Available\+A\+A\+Ms()}{getAvailableAAMs()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+get\+Available\+A\+A\+Ms (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Endpoint for listing available A\+AM instances.
+
+\begin{DoxyReturn}{Returns}
+list of available A\+AM instances 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_aca68318d41a4eb6990ecb13e147653d2}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_aca68318d41a4eb6990ecb13e147653d2}} 
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!get\+Ca\+Cert@{get\+Ca\+Cert}}
+\index{get\+Ca\+Cert@{get\+Ca\+Cert}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection{\texorpdfstring{get\+Ca\+Cert()}{getCaCert()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+get\+Ca\+Cert (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Endpoint for reading CA certificate.
+
+\begin{DoxyReturn}{Returns}
+CA certificate 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77926783c29213efb03dee68ca69f3d4}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77926783c29213efb03dee68ca69f3d4}} 
 \index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!get\+Resource\+Urls@{get\+Resource\+Urls}}
 \index{get\+Resource\+Urls@{get\+Resource\+Urls}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
-\subsubsection[{\texorpdfstring{get\+Resource\+Urls("@Request\+Param(""id"") String[] resource\+Id)}{getResourceUrls(@RequestParam("id") String[] resourceId)}}]{\setlength{\rightskip}{0pt plus 5cm}Response\+Entity$<$?$>$ eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+get\+Resource\+Urls (
-\begin{DoxyParamCaption}
-\item[{@Request\+Param(\char`\"{}id\char`\"{}) String\mbox{[}$\,$\mbox{]}}]{resource\+Id}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a11f9875a81bc3f2a8150b1fb12285ce4}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a11f9875a81bc3f2a8150b1fb12285ce4}
-Endpoint for querying U\+RL of resources\textquotesingle{} Interworking Interface.
+\subsubsection{\texorpdfstring{get\+Resource\+Urls()}{getResourceUrls()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+get\+Resource\+Urls (\begin{DoxyParamCaption}\item[{@Request\+Param(\char`\"{}id\char`\"{}) String \mbox{[}$\,$\mbox{]}}]{resource\+Id,  }\item[{@Request\+Header(\char`\"{}X-\/Auth-\/Token\char`\"{}) String}]{token }\end{DoxyParamCaption})}
+
+Endpoint for querying U\+RL of resources\textquotesingle{} Interworking Interface. 
 
 After receiving query results, user (or application) may choose interesting resources to contact, but it does not have any means of communicate with resources\textquotesingle{} Interworking Interface. Therefore, it needs to send another request querying for U\+R\+Ls Interworking Services of resources of specified I\+Ds.
 
 
 \begin{DoxyParams}{Parameters}
-{\em resource\+Id} & ID of a resource to get Interworking Interface U\+RL; multiple I\+Ds can be passed\\
+{\em resource\+Id} & ID of a resource to get Interworking Interface U\+RL; multiple I\+Ds can be passed \\
+\hline
+{\em token} & security token \\
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
 map containing entries in a form of \{\char`\"{}resource\+Id1\char`\"{}\+:\char`\"{}\+Interworking\+Interface\+Url1\char`\"{}, \char`\"{}resource\+Id2\char`\"{}\+:\char`\"{}\+Interworking\+Interface2\char`\"{}, ... \} 
 \end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_ae47382b47714db8cd0e659b30774355d}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_ae47382b47714db8cd0e659b30774355d}} 
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!login@{login}}
+\index{login@{login}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection{\texorpdfstring{login()}{login()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+login (\begin{DoxyParamCaption}\item[{@Request\+Body Credentials}]{user }\end{DoxyParamCaption})}
+
+Endpoint for logging in to symb\+Io\+Te Core to obtain security token.
+
+
+\begin{DoxyParams}{Parameters}
+{\em user} & user credentials \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+empty response with security token filled in header field 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_aa3f7d2db7a96024ca0cefdef1dbe13fa}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_aa3f7d2db7a96024ca0cefdef1dbe13fa}} 
 \index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!query@{query}}
 \index{query@{query}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
-\subsubsection[{\texorpdfstring{query("@Request\+Param(value=""platform\+\_\+id"", required=false) String platform\+Id,"@Request\+Param(value=""platform\+\_\+name"", required=false) String platform\+Name,"@Request\+Param(value=""owner"", required=false) String owner,"@Request\+Param(value=""name"", required=false) String name,"@Request\+Param(value=""id"", required=false) String id,"@Request\+Param(value=""description"", required=false) String description,"@Request\+Param(value=""location\+\_\+name"", required=false) String location\+\_\+name,"@Request\+Param(value=""location\+\_\+lat"", required=false) Double location\+\_\+lat,"@Request\+Param(value=""location\+\_\+long"", required=false) Double location\+\_\+long,"@Request\+Param(value=""max\+\_\+distance"", required=false) Integer max\+\_\+distance,"@Request\+Param(value=""observed\+\_\+property"", required=false) String[] observed\+\_\+property)}{query(@RequestParam(value="platform_id", required=false) String platformId,@RequestParam(value="platform_name", required=false) String platformName,@RequestParam(value="owner", required=false) String owner,@RequestParam(value="name", required=false) String name,@RequestParam(value="id", required=false) String id,@RequestParam(value="description", required=false) String description,@RequestParam(value="location_name", required=false) String location_name,@RequestParam(value="location_lat", required=false) Double location_lat,@RequestParam(value="location_long", required=false) Double location_long,@RequestParam(value="max_distance", required=false) Integer max_distance,@RequestParam(value="observed_property", required=false) String[] observed_property)}}]{\setlength{\rightskip}{0pt plus 5cm}Response\+Entity$<$?$>$ eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+query (
-\begin{DoxyParamCaption}
-\item[{@Request\+Param(value=\char`\"{}platform\+\_\+id\char`\"{}, required=false) String}]{platform\+Id, }
-\item[{@Request\+Param(value=\char`\"{}platform\+\_\+name\char`\"{}, required=false) String}]{platform\+Name, }
-\item[{@Request\+Param(value=\char`\"{}owner\char`\"{}, required=false) String}]{owner, }
-\item[{@Request\+Param(value=\char`\"{}name\char`\"{}, required=false) String}]{name, }
-\item[{@Request\+Param(value=\char`\"{}id\char`\"{}, required=false) String}]{id, }
-\item[{@Request\+Param(value=\char`\"{}description\char`\"{}, required=false) String}]{description, }
-\item[{@Request\+Param(value=\char`\"{}location\+\_\+name\char`\"{}, required=false) String}]{location\+\_\+name, }
-\item[{@Request\+Param(value=\char`\"{}location\+\_\+lat\char`\"{}, required=false) Double}]{location\+\_\+lat, }
-\item[{@Request\+Param(value=\char`\"{}location\+\_\+long\char`\"{}, required=false) Double}]{location\+\_\+long, }
-\item[{@Request\+Param(value=\char`\"{}max\+\_\+distance\char`\"{}, required=false) Integer}]{max\+\_\+distance, }
-\item[{@Request\+Param(value=\char`\"{}observed\+\_\+property\char`\"{}, required=false) String\mbox{[}$\,$\mbox{]}}]{observed\+\_\+property}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77e06f47bb9cea92496704aae1b88b86}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a77e06f47bb9cea92496704aae1b88b86}
+\subsubsection{\texorpdfstring{query()}{query()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+query (\begin{DoxyParamCaption}\item[{@Request\+Param(value=\char`\"{}platform\+\_\+id\char`\"{}, required=false) String}]{platform\+Id,  }\item[{@Request\+Param(value=\char`\"{}platform\+\_\+name\char`\"{}, required=false) String}]{platform\+Name,  }\item[{@Request\+Param(value=\char`\"{}owner\char`\"{}, required=false) String}]{owner,  }\item[{@Request\+Param(value=\char`\"{}name\char`\"{}, required=false) String}]{name,  }\item[{@Request\+Param(value=\char`\"{}id\char`\"{}, required=false) String}]{id,  }\item[{@Request\+Param(value=\char`\"{}description\char`\"{}, required=false) String}]{description,  }\item[{@Request\+Param(value=\char`\"{}location\+\_\+name\char`\"{}, required=false) String}]{location\+\_\+name,  }\item[{@Request\+Param(value=\char`\"{}location\+\_\+lat\char`\"{}, required=false) Double}]{location\+\_\+lat,  }\item[{@Request\+Param(value=\char`\"{}location\+\_\+long\char`\"{}, required=false) Double}]{location\+\_\+long,  }\item[{@Request\+Param(value=\char`\"{}max\+\_\+distance\char`\"{}, required=false) Integer}]{max\+\_\+distance,  }\item[{@Request\+Param(value=\char`\"{}observed\+\_\+property\char`\"{}, required=false) String \mbox{[}$\,$\mbox{]}}]{observed\+\_\+property,  }\item[{@Request\+Param(value=\char`\"{}resource\+\_\+type\char`\"{}, required=false) String}]{resource\+\_\+type,  }\item[{@Request\+Header(\char`\"{}X-\/Auth-\/Token\char`\"{}) String}]{token }\end{DoxyParamCaption})}
+
 Endpoint for querying registered resources. Query parameters are passed via G\+ET request params and are all optional. When passing multiple parameters, including multiple observed\+\_\+properties, they are all linked with logical A\+ND operator. In \char`\"{}text\char`\"{} parameters (name, description, platform\+Name, owner, location\+Name), $\ast$ can be used as a wildcard in the beginning or/and in the end of value.
 
 
@@ -114,20 +167,48 @@ Endpoint for querying registered resources. Query parameters are passed via G\+E
 \hline
 {\em observed\+\_\+property} & property observed by resource; can be set multiple times to indicate more than one observed property \\
 \hline
+{\em resource\+\_\+type} & type of queried resource \\
+\hline
+{\em token} & security token \\
+\hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
 query result as body or null along with appropriate error H\+T\+TP status code 
 \end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a779ecc60765fc72199347821fd462dae}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a779ecc60765fc72199347821fd462dae}} 
+\index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!request\+Foreign\+Token@{request\+Foreign\+Token}}
+\index{request\+Foreign\+Token@{request\+Foreign\+Token}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
+\subsubsection{\texorpdfstring{request\+Foreign\+Token()}{requestForeignToken()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+request\+Foreign\+Token (\begin{DoxyParamCaption}\item[{@Request\+Header(A\+A\+M\+Constants.\+T\+O\+K\+E\+N\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+N\+A\+ME) String}]{token }\end{DoxyParamCaption})}
+
+Endpoint for requesting foreign token.
+
+
+\begin{DoxyParams}{Parameters}
+{\em token} & security token \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+foreign token 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a7ee735ef5179a5877209ae270e7f8465}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_a7ee735ef5179a5877209ae270e7f8465}} 
 \index{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}!sparql\+Query@{sparql\+Query}}
 \index{sparql\+Query@{sparql\+Query}!eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller@{eu\+::h2020\+::symbiote\+::controllers\+::\+Core\+Interface\+Controller}}
-\subsubsection[{\texorpdfstring{sparql\+Query("@Request\+Body String sparql\+Query)}{sparqlQuery(@RequestBody String sparqlQuery)}}]{\setlength{\rightskip}{0pt plus 5cm}Response\+Entity$<$?$>$ eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+sparql\+Query (
-\begin{DoxyParamCaption}
-\item[{@Request\+Body String}]{sparql\+Query}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_adfa6e88c052cd6e8978294588fe116d5}{}\label{classeu_1_1h2020_1_1symbiote_1_1controllers_1_1CoreInterfaceController_adfa6e88c052cd6e8978294588fe116d5}
+\subsubsection{\texorpdfstring{sparql\+Query()}{sparqlQuery()}}
+{\footnotesize\ttfamily Response\+Entity eu.\+h2020.\+symbiote.\+controllers.\+Core\+Interface\+Controller.\+sparql\+Query (\begin{DoxyParamCaption}\item[{@Request\+Body Sparql\+Query\+Request}]{sparql\+Query,  }\item[{@Request\+Header(\char`\"{}X-\/Auth-\/Token\char`\"{}) String}]{token }\end{DoxyParamCaption})}
+
 Endpoint for querying registered resources using S\+P\+A\+R\+QL. 
 
-Currently not implemented. 
+After receiving query results, user (or application) may choose interesting resources to contact, but it does not have any means of communicate with resources\textquotesingle{} Interworking Interface. Therefore, it needs to send another request querying for U\+R\+Ls Interworking Services of resources of specified I\+Ds.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sparql\+Query} & query object containing sparql query and output format to get results in \\
+\hline
+{\em token} & security token \\
+\hline
+\end{DoxyParams}
+
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 

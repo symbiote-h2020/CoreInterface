@@ -7,7 +7,7 @@ Collaboration diagram for eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manage
 \begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=251pt]{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager__coll__graph}
+\includegraphics[width=250pt]{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager__coll__graph}
 \end{center}
 \end{figure}
 \subsection*{Public Member Functions}
@@ -15,11 +15,13 @@ Collaboration diagram for eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manage
 \item 
 void \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a30abf6a670122eb22a8105a206858616}{init\+Communication} ()
 \item 
-String \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a822ebbed01755311ca9038bb7fa43591}{send\+Rpc\+Message} (String exchange\+Name, String routing\+Key, String message)
+String \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a9c71bf18d0bf371fd35c977a69861855}{send\+Rpc\+Message} (String exchange\+Name, String routing\+Key, String message, String class\+Type)
 \item 
-Map$<$ String, String $>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}{send\+Resource\+Urls\+Request} (\hyperlink{classeu_1_1h2020_1_1symbiote_1_1model_1_1ResourceUrlsRequest}{Resource\+Urls\+Request} request)
+Map$<$ String, String $>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}{send\+Resource\+Urls\+Request} (Resource\+Urls\+Request request)
 \item 
-List$<$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1model_1_1Resource}{Resource} $>$ \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_ad61f8d511d62197ce15bc1e74a9f8e9c}{send\+Search\+Request} (\hyperlink{classeu_1_1h2020_1_1symbiote_1_1model_1_1QueryRequest}{Query\+Request} request)
+Query\+Response \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a5b92c55b2c12067f60f030f6fdabb685}{send\+Search\+Request} (Core\+Query\+Request request)
+\item 
+String \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a33cffe584ceba766deba679997ca68a4}{send\+Sparql\+Search\+Request} (Core\+Sparql\+Query\+Request request)
 \end{DoxyCompactItemize}
 
 
@@ -29,23 +31,21 @@ Class used for all internal communication using Rabbit\+MQ A\+M\+QP implementati
 \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager}{Rabbit\+Manager} uses properties taken from Core\+Config\+Server to set up communication (exchange parameters, routing keys etc.) 
 
 \subsection{Member Function Documentation}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a30abf6a670122eb22a8105a206858616}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a30abf6a670122eb22a8105a206858616}} 
 \index{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}!init\+Communication@{init\+Communication}}
 \index{init\+Communication@{init\+Communication}!eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}}
-\subsubsection[{\texorpdfstring{init\+Communication()}{initCommunication()}}]{\setlength{\rightskip}{0pt plus 5cm}void eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+init\+Communication (
-\begin{DoxyParamCaption}
-{}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a30abf6a670122eb22a8105a206858616}{}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a30abf6a670122eb22a8105a206858616}
-Method used to initialise Rabbit\+MQ connection and declare all required exchanges. This method should be called once, after bean initialization (so that properties from Core\+Config\+Server are obtained), but before using \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager}{Rabbit\+Manager} to send any message. \index{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}!send\+Resource\+Urls\+Request@{send\+Resource\+Urls\+Request}}
+\subsubsection{\texorpdfstring{init\+Communication()}{initCommunication()}}
+{\footnotesize\ttfamily void eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+init\+Communication (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Method used to initialise Rabbit\+MQ connection and declare all required exchanges. This method should be called once, after bean initialization (so that properties from Core\+Config\+Server are obtained), but before using \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager}{Rabbit\+Manager} to send any message. \mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}} 
+\index{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}!send\+Resource\+Urls\+Request@{send\+Resource\+Urls\+Request}}
 \index{send\+Resource\+Urls\+Request@{send\+Resource\+Urls\+Request}!eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}}
-\subsubsection[{\texorpdfstring{send\+Resource\+Urls\+Request(\+Resource\+Urls\+Request request)}{sendResourceUrlsRequest(ResourceUrlsRequest request)}}]{\setlength{\rightskip}{0pt plus 5cm}Map$<$String, String$>$ eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+send\+Resource\+Urls\+Request (
-\begin{DoxyParamCaption}
-\item[{{\bf Resource\+Urls\+Request}}]{request}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}{}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}
+\subsubsection{\texorpdfstring{send\+Resource\+Urls\+Request()}{sendResourceUrlsRequest()}}
+{\footnotesize\ttfamily Map$<$String, String$>$ eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+send\+Resource\+Urls\+Request (\begin{DoxyParamCaption}\item[{Resource\+Urls\+Request}]{request }\end{DoxyParamCaption})}
+
 Method used to send R\+PC request to get specified resources U\+R\+Ls. 
 
-Upon querying symb\+Io\+Te using \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_ad61f8d511d62197ce15bc1e74a9f8e9c}{send\+Search\+Request(\+Query\+Request)}, user gets resource without their Resource Access Proxy\textquotesingle{}s U\+R\+Ls. It is necessary to obtain them from core Resource Access Monitor by supplying list of chosen resource I\+Ds.
+Upon querying symb\+Io\+Te using \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a5b92c55b2c12067f60f030f6fdabb685}{send\+Search\+Request(\+Core\+Query\+Request)}, user gets resource without their Resource Access Proxy\textquotesingle{}s U\+R\+Ls. It is necessary to obtain them from core Resource Access Monitor by supplying list of chosen resource I\+Ds.
 
 
 \begin{DoxyParams}{Parameters}
@@ -55,15 +55,12 @@ Upon querying symb\+Io\+Te using \hyperlink{classeu_1_1h2020_1_1symbiote_1_1comm
 \begin{DoxyReturn}{Returns}
 response map in form of \{\char`\"{}id1\char`\"{}\+:\char`\"{}\+U\+R\+L1\char`\"{}, \char`\"{}id2\char`\"{}\+:\char`\"{}\+U\+R\+L2\char`\"{}, ... \}, or null when timeout occurs 
 \end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a9c71bf18d0bf371fd35c977a69861855}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a9c71bf18d0bf371fd35c977a69861855}} 
 \index{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}!send\+Rpc\+Message@{send\+Rpc\+Message}}
 \index{send\+Rpc\+Message@{send\+Rpc\+Message}!eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}}
-\subsubsection[{\texorpdfstring{send\+Rpc\+Message(\+String exchange\+Name, String routing\+Key, String message)}{sendRpcMessage(String exchangeName, String routingKey, String message)}}]{\setlength{\rightskip}{0pt plus 5cm}String eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+send\+Rpc\+Message (
-\begin{DoxyParamCaption}
-\item[{String}]{exchange\+Name, }
-\item[{String}]{routing\+Key, }
-\item[{String}]{message}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a822ebbed01755311ca9038bb7fa43591}{}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a822ebbed01755311ca9038bb7fa43591}
+\subsubsection{\texorpdfstring{send\+Rpc\+Message()}{sendRpcMessage()}}
+{\footnotesize\ttfamily String eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+send\+Rpc\+Message (\begin{DoxyParamCaption}\item[{String}]{exchange\+Name,  }\item[{String}]{routing\+Key,  }\item[{String}]{message,  }\item[{String}]{class\+Type }\end{DoxyParamCaption})}
+
 Method used to send message via R\+PC (Remote Procedure Call) pattern. In this implementation it covers asynchronous Rabbit communication with synchronous one, as it is used by conventional R\+E\+ST facade. Before sending a message, a temporary response queue is declared and its name is passed along with the message. When a consumer handles the message, it returns the result via the response queue. Since this is a synchronous pattern, it uses timeout of 20 seconds. If the response doesn\textquotesingle{}t come in that time, the method returns with null result.
 
 
@@ -78,14 +75,13 @@ Method used to send message via R\+PC (Remote Procedure Call) pattern. In this i
 \begin{DoxyReturn}{Returns}
 response from the consumer or null if timeout occurs 
 \end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a5b92c55b2c12067f60f030f6fdabb685}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a5b92c55b2c12067f60f030f6fdabb685}} 
 \index{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}!send\+Search\+Request@{send\+Search\+Request}}
 \index{send\+Search\+Request@{send\+Search\+Request}!eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}}
-\subsubsection[{\texorpdfstring{send\+Search\+Request(\+Query\+Request request)}{sendSearchRequest(QueryRequest request)}}]{\setlength{\rightskip}{0pt plus 5cm}List$<${\bf Resource}$>$ eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+send\+Search\+Request (
-\begin{DoxyParamCaption}
-\item[{{\bf Query\+Request}}]{request}
-\end{DoxyParamCaption}
-)}\hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_ad61f8d511d62197ce15bc1e74a9f8e9c}{}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_ad61f8d511d62197ce15bc1e74a9f8e9c}
-Method used to send R\+PC request to query symb\+Io\+Te registry for resources.
+\subsubsection{\texorpdfstring{send\+Search\+Request()}{sendSearchRequest()}}
+{\footnotesize\ttfamily Query\+Response eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+send\+Search\+Request (\begin{DoxyParamCaption}\item[{Core\+Query\+Request}]{request }\end{DoxyParamCaption})}
+
+Method used to send R\+PC request to query symb\+Io\+Te registry for resources. 
 
 Returned resources do not contain U\+R\+Ls to contact them. Another call to \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}{send\+Resource\+Urls\+Request(\+Resource\+Urls\+Request)} is needed to obtain U\+R\+Ls.
 
@@ -96,6 +92,24 @@ Returned resources do not contain U\+R\+Ls to contact them. Another call to \hyp
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
 response list of requested resources, or null when timeout occurs 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a33cffe584ceba766deba679997ca68a4}\label{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a33cffe584ceba766deba679997ca68a4}} 
+\index{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}!send\+Sparql\+Search\+Request@{send\+Sparql\+Search\+Request}}
+\index{send\+Sparql\+Search\+Request@{send\+Sparql\+Search\+Request}!eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager@{eu\+::h2020\+::symbiote\+::communication\+::\+Rabbit\+Manager}}
+\subsubsection{\texorpdfstring{send\+Sparql\+Search\+Request()}{sendSparqlSearchRequest()}}
+{\footnotesize\ttfamily String eu.\+h2020.\+symbiote.\+communication.\+Rabbit\+Manager.\+send\+Sparql\+Search\+Request (\begin{DoxyParamCaption}\item[{Core\+Sparql\+Query\+Request}]{request }\end{DoxyParamCaption})}
+
+Method used to send R\+PC request to query symb\+Io\+Te registry for resources using sparql. 
+
+Returned resources do not contain U\+R\+Ls to contact them. Another call to \hyperlink{classeu_1_1h2020_1_1symbiote_1_1communication_1_1RabbitManager_a56ce4aea24a797b642a52a3071acf0cb}{send\+Resource\+Urls\+Request(\+Resource\+Urls\+Request)} is needed to obtain U\+R\+Ls.
+
+
+\begin{DoxyParams}{Parameters}
+{\em request} & request object describing sparql query parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+response string of requested resources, or null when timeout occurs 
 \end{DoxyReturn}
 
 

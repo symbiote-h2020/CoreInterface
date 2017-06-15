@@ -1,8 +1,8 @@
 var indexSectionsWithContent =
 {
-  0: "cgiqrs",
-  1: "cqr",
-  2: "cgiqrs",
+  0: "cgilqrs",
+  1: "cr",
+  2: "cgilqrs",
   3: "r"
 };
 
