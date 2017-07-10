@@ -7,7 +7,10 @@ import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
 import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
 import eu.h2020.symbiote.security.payloads.Credentials;
+import eu.h2020.symbiote.security.session.AAM;
+import io.swagger.annotations.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +26,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import io.swagger.annotations.*;
 
 /**
  * Class defining all REST endpoints.
@@ -80,24 +81,24 @@ public class CoreInterfaceController {
      */
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/query")
-    @ApiOperation(value = "HTTP GET query",
-            notes = "Search for resources using HTTP GET. The parameters that can be used for such a query are static and defined below",
+    @ApiOperation(value = "Query for resources",
+            notes = "Search for resources using defined query parameters",
             response = QueryResponse.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "Resource Not Found") })
-    public ResponseEntity query(@ApiParam(value = "The id of the platform owning the resource") @RequestParam(value = "platform_id", required = false) String platformId,
-                                @ApiParam(value = "The name of the platform owning the resources") @RequestParam(value = "platform_name", required = false) String platformName,
-                                @ApiParam(value = "The owner of the resource") @RequestParam(value = "owner", required = false) String owner,
-                                @ApiParam(value = "The name of the resource") @RequestParam(value = "name", required = false) String name,
-                                @ApiParam(value = "The id of the resource") @RequestParam(value = "id", required = false) String id,
-                                @ApiParam(value = "The description of the resource") @RequestParam(value = "description", required = false) String description,
-                                @ApiParam(value = "The location name of the resource") @RequestParam(value = "location_name", required = false) String location_name,
-                                @ApiParam(value = "The latitude of the resource") @RequestParam(value = "location_lat", required = false) Double location_lat,
-                                @ApiParam(value = "The longitude of the resource") @RequestParam(value = "location_long", required = false) Double location_long,
-                                @ApiParam(value = "The maximum distance from the resource") @RequestParam(value = "max_distance", required = false) Integer max_distance,
-                                @ApiParam(value = "The observed properties of the resource") @RequestParam(value = "observed_property", required = false) String[] observed_property,
-                                @ApiParam(value = "The resource type") @RequestParam(value = "resource_type", required = false) String resource_type,
-                                @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming") @RequestHeader("X-Auth-Token") String token) {
+            @ApiResponse(code = 500, message = "Query execution error on server side")})
+    public ResponseEntity query(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platformId,
+                                @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platformName,
+                                @ApiParam(value = "owner of a platform that resource belongs to") @RequestParam(value = "owner", required = false) String owner,
+                                @ApiParam(value = "name of a resource") @RequestParam(value = "name", required = false) String name,
+                                @ApiParam(value = "ID of a resource") @RequestParam(value = "id", required = false) String id,
+                                @ApiParam(value = "description of a resource") @RequestParam(value = "description", required = false) String description,
+                                @ApiParam(value = "name of resource's location") @RequestParam(value = "location_name", required = false) String location_name,
+                                @ApiParam(value = "latitude of resource's location") @RequestParam(value = "location_lat", required = false) Double location_lat,
+                                @ApiParam(value = "longitude of resource's location") @RequestParam(value = "location_long", required = false) Double location_long,
+                                @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
+                                @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
+                                @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader("X-Auth-Token") String token) {
 
         CoreQueryRequest queryRequest = new CoreQueryRequest();
         queryRequest.setPlatform_id(platformId);
@@ -134,9 +135,15 @@ public class CoreInterfaceController {
      * @param sparqlQuery query object containing sparql query and output format to get results in
      * @param token       security token
      */
+    @ApiOperation(value = "Sparql query for resources",
+            notes = "Search for resources using sparql query",
+            response = String.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = "Query execution error on server side")})
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + "/sparqlQuery")
-    public ResponseEntity sparqlQuery(@RequestBody SparqlQueryRequest sparqlQuery, @RequestHeader("X-Auth-Token") String token) {
+    public ResponseEntity sparqlQuery(@ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
+                                      @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader("X-Auth-Token") String token) {
         CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
         request.setToken(token);
         request.setQuery(sparqlQuery.getSparqlQuery());
@@ -161,9 +168,18 @@ public class CoreInterfaceController {
      * @param token      security token
      * @return map containing entries in a form of {"resourceId1":"InterworkingInterfaceUrl1", "resourceId2":"InterworkingInterface2", ... }
      */
+    @ApiOperation(value = "Get resources' URLs",
+            notes = "Gets URLs of resources specified by passed IDs"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Returns requested URLs in a form of {\"id1\":\"url1\",\"id2\":\"url2\" ... }", response = String.class, responseContainer = "Map"),
+            @ApiResponse(code = 500, message = "Query execution error on server side")
+
+    })
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/resourceUrls")
-    public ResponseEntity getResourceUrls(@RequestParam("id") String[] resourceId, @RequestHeader("X-Auth-Token") String token) {
+    public ResponseEntity getResourceUrls(@ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
+                                          @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader("X-Auth-Token") String token) {
         ResourceUrlsRequest request = new ResourceUrlsRequest();
         request.setIdList(Arrays.asList(resourceId));
         request.setToken(token);
@@ -182,9 +198,17 @@ public class CoreInterfaceController {
      * @param user user credentials
      * @return empty response with security token filled in header field
      */
+    @ApiOperation(value = "Login to symbIoTe",
+            notes = "Login to symbIoTe core and obtain access token",
+            response = String.class
+            )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = Void.class, responseHeaders = @ResponseHeader(name = "X-Auth-Token", description = "A valid token issued by a member of the SymbIoTe Security Roaming", response = String.class)),
+            @ApiResponse(code = 400, message = "Username and/or password not supplied"),
+            @ApiResponse(code = 401, message = "Wrong username and/or password")})
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + AAMConstants.AAM_LOGIN)
-    public ResponseEntity login(@RequestBody Credentials user) {
+    public ResponseEntity login(@ApiParam(name="Credentials", value = "User's login credentials", required = true) @RequestBody Credentials user) {
         log.debug("Login request");
         try {
             ResponseEntity<String> entity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
@@ -204,6 +228,13 @@ public class CoreInterfaceController {
      *
      * @return CA certificate
      */
+    @ApiOperation(value = "Get CA certificate",
+            notes = "Obtain certificate of certificate authority",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + AAMConstants.AAM_GET_CA_CERTIFICATE)
     public ResponseEntity getCaCert() {
@@ -227,9 +258,17 @@ public class CoreInterfaceController {
      * @param token security token
      * @return foreign token
      */
+    @ApiOperation(value = "Request foreign token",
+            notes = "Request foreign token from AAM",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = Void.class, responseHeaders = @ResponseHeader(name = "X-Auth-Token", description = "Requested foreign token", response = String.class)),
+            @ApiResponse(code = 400, message = "Request is not complete or not valid"),
+            @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN)
-    public ResponseEntity requestForeignToken(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
+    public ResponseEntity requestForeignToken(@ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
         log.debug("Foreign token request");
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -255,9 +294,16 @@ public class CoreInterfaceController {
      * @param token security token
      * @return status of token
      */
+    @ApiOperation(value = "Check home token revocation",
+            notes = "Check home token revocation",
+            response = CheckRevocationResponse.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = CheckRevocationResponse.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION)
-    public ResponseEntity checkHomeTokenRevocation(@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
+    public ResponseEntity checkHomeTokenRevocation(@ApiParam(value = "Token to be verified", required = true)@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
         log.debug("Check Home Token revocation request");
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -282,6 +328,12 @@ public class CoreInterfaceController {
      *
      * @return list of available AAM instances
      */
+    @ApiOperation(value = "Get available AAMs",
+            notes = "Get list of available AAM instances"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = AAM.class, responseContainer = "List"),
+            @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + AAMConstants.AAM_GET_AVAILABLE_AAMS)
     public ResponseEntity getAvailableAAMs() {
