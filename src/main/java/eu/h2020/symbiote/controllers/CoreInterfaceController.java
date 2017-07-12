@@ -43,6 +43,7 @@ public class CoreInterfaceController {
     public static final Log log = LogFactory.getLog(CoreInterfaceController.class);
 
     private final RabbitManager rabbitManager;
+    private RestTemplate restTemplate;
 
     @Value("${symbiote.aamUrl}")
     private String aamUrl;
@@ -55,6 +56,7 @@ public class CoreInterfaceController {
     @Autowired
     public CoreInterfaceController(RabbitManager rabbitManager) {
         this.rabbitManager = rabbitManager;
+        this.restTemplate = new RestTemplate();
     }
 
     /**
@@ -211,7 +213,7 @@ public class CoreInterfaceController {
     public ResponseEntity login(@ApiParam(name="Credentials", value = "User's login credentials", required = true) @RequestBody Credentials user) {
         log.debug("Login request");
         try {
-            ResponseEntity<String> entity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
+            ResponseEntity<String> entity = this.restTemplate.postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
 
             HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
@@ -240,7 +242,7 @@ public class CoreInterfaceController {
     public ResponseEntity getCaCert() {
         log.debug("Get CA Cert request");
         try {
-            ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_CA_CERTIFICATE, String.class);
+            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + AAMConstants.AAM_GET_CA_CERTIFICATE, String.class);
 
             HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
@@ -276,7 +278,7 @@ public class CoreInterfaceController {
 
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
-            ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
@@ -311,7 +313,7 @@ public class CoreInterfaceController {
 
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
-            ResponseEntity<String> stringResponseEntity = new RestTemplate().postForEntity(this.aamUrl + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
@@ -339,7 +341,7 @@ public class CoreInterfaceController {
     public ResponseEntity getAvailableAAMs() {
         log.debug("Get Available AAMS request");
         try {
-            ResponseEntity<String> entity = new RestTemplate().getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
+            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
 
             HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
@@ -372,6 +374,14 @@ public class CoreInterfaceController {
         }
 
         return newHeaders;
+    }
+
+    /**
+     * Used to override RestTemplate used in request proxying with a mocked version for unit testing.
+     * @param restTemplate
+     */
+    public void setRestTemplate(RestTemplate restTemplate){
+        this.restTemplate = restTemplate;
     }
 
 

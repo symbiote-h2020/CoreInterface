@@ -92,6 +92,37 @@ public class RabbitManager {
     private Channel channel;
 
     /**
+     * Method used to override connection parameters.
+     * Used ONLY for unit testing.
+     *
+     * @param rabbitHost
+     * @param rabbitUsername
+     * @param rabbitPassword
+     * @param exchangeName
+     * @param exchangeType
+     * @param exchangeDurable
+     * @param exchangeAutodelete
+     * @param exchangeInternal
+     */
+    public void setTestParameters(String rabbitHost, String rabbitUsername, String rabbitPassword, String exchangeName, String exchangeType, boolean exchangeDurable, boolean exchangeAutodelete, boolean exchangeInternal){
+        this.rabbitHost = rabbitHost;
+        this.rabbitUsername = rabbitUsername;
+        this.rabbitPassword = rabbitPassword;
+
+        this.cramExchangeName = exchangeName;
+        this.cramExchangeType = exchangeType;
+        this.cramExchangeDurable = exchangeDurable;
+        this.cramExchangeAutodelete = exchangeAutodelete;
+        this.cramExchangeInternal = exchangeInternal;
+
+        this.resourceExchangeName = exchangeName;
+        this.resourceExchangeType = exchangeType;
+        this.resourceExchangeDurable = exchangeDurable;
+        this.resourceExchangeAutodelete = exchangeAutodelete;
+        this.resourceExchangeInternal = exchangeInternal;
+    }
+
+    /**
      * Method used to initialise RabbitMQ connection and declare all required exchanges.
      * This method should be called once, after bean initialization (so that properties from CoreConfigServer are obtained),
      * but before using RabbitManager to send any message.
@@ -131,7 +162,7 @@ public class RabbitManager {
      * Cleanup method, used to close RabbitMQ channel and connection.
      */
     @PreDestroy
-    private void cleanup() {
+    public void cleanup() {
         log.info("Closing RabbitMQ channel and connection");
         try {
             if (this.channel != null && this.channel.isOpen())
@@ -281,5 +312,15 @@ public class RabbitManager {
             log.error(CORE_PARSE_ERROR_MSG, e);
         }
         return null;
+    }
+
+    /**
+     * Get current RabbitMQ channel.
+     * Used ONLY dor unit testing.
+     *
+     * @return current RabbitMQ channel
+     */
+    public Channel getChannel(){
+        return this.channel;
     }
 }

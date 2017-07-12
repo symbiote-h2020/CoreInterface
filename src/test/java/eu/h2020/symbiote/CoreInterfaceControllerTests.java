@@ -8,19 +8,26 @@ import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
+import eu.h2020.symbiote.security.constants.AAMConstants;
+import eu.h2020.symbiote.security.enums.ValidationStatus;
+import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
+import eu.h2020.symbiote.security.payloads.Credentials;
+import eu.h2020.symbiote.security.session.AAM;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.notNull;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +41,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, null, null,null);
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -46,7 +53,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null,null);
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertTrue(response.getBody() instanceof QueryResponse);
@@ -142,9 +149,9 @@ public class CoreInterfaceControllerTests {
     public void testResourceUrls_3ids() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
         Map<String, String> result = new HashMap<>();
-        result.put("123","http://example.com/123");
-        result.put("abc","http://example.com/abc");
-        result.put("xyz","http://example.com/xyz");
+        result.put("123", "http://example.com/123");
+        result.put("abc", "http://example.com/abc");
+        result.put("xyz", "http://example.com/xyz");
 
         when(rabbitManager.sendResourceUrlsRequest((ResourceUrlsRequest) notNull())).thenReturn(result);
 
@@ -176,7 +183,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(),null);
+        ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(), null);
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertTrue(response.getBody() instanceof String);
@@ -197,6 +204,200 @@ public class CoreInterfaceControllerTests {
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertTrue(response.getBody() instanceof String);
         assertEquals(13, ((String) response.getBody()).length());
+    }
+
+    @Test
+    public void testLogin_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(AAMConstants.TOKEN_HEADER_NAME, "token");
+
+        ResponseEntity response = new ResponseEntity(httpHeaders, HttpStatus.OK);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.login(new Credentials("username", "password"));
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(response.getHeaders());
+        assertNotNull(response.getHeaders().get(AAMConstants.TOKEN_HEADER_NAME));
+    }
+
+    @Test
+    public void testLogin_badRequest() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.login(new Credentials("username", "password"));
+        assertNotNull(result);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testGetCaCert_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        ResponseEntity response = new ResponseEntity("ca cert", HttpStatus.OK);
+
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getCaCert();
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody() instanceof String);
+        assertEquals("ca cert", (String) result.getBody());
+    }
+
+    @Test
+    public void testGetCaCert_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getCaCert();
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testForeignToken_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(AAMConstants.TOKEN_HEADER_NAME, "token");
+
+        ResponseEntity response = new ResponseEntity(httpHeaders, HttpStatus.OK);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.requestForeignToken("token");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(response.getHeaders());
+        assertNotNull(response.getHeaders().get(AAMConstants.TOKEN_HEADER_NAME));
+    }
+
+    @Test
+    public void testForeignToken_badRequest() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.requestForeignToken("token");
+        assertNotNull(result);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testRevocation_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        ResponseEntity response = new ResponseEntity(new CheckRevocationResponse(ValidationStatus.VALID), HttpStatus.OK);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.checkHomeTokenRevocation("token");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody() instanceof CheckRevocationResponse);
+        assertEquals("VALID", ((CheckRevocationResponse) result.getBody()).getStatus());
+    }
+
+    @Test
+    public void testRevocationn_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.checkHomeTokenRevocation("token");
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testGetAams_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        List<AAM> aamsList = new ArrayList<>();
+        aamsList.add(new AAM());
+        aamsList.add(new AAM());
+
+        ResponseEntity response = new ResponseEntity(aamsList, HttpStatus.OK);
+
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getAvailableAAMs();
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody() instanceof List);
+        assertEquals(2, ((List)result.getBody()).size());
+        assertTrue(((List)result.getBody()).get(0) instanceof AAM);
+    }
+
+    @Test
+    public void testGetAams_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.getForEntity(anyString(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getAvailableAAMs();
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
     }
 
 }
