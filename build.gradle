@@ -48,9 +48,9 @@ dependencies {
             4) never commit build.gradle which has project dependencies active as it will break CI builds
     */
     // compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') { changing = true }
-    compile('com.github.symbiote-h2020:SymbIoTeLibraries:0.2.0')
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:0.2.1')
 
-    
+    // Spring
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-zipkin') // Causes the java.net.ConnectException
@@ -59,11 +59,11 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 
+
+    // Test only
+    testCompile 'junit:junit:4.12'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
-
-    // Use JUnit4
-    testCompile 'junit:junit:4.12'
 }
 
 dependencyManagement {
