@@ -41,7 +41,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, null, null, null);
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -53,7 +53,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null, null);
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null, null, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertTrue(response.getBody() instanceof QueryResponse);
@@ -112,7 +112,7 @@ public class CoreInterfaceControllerTests {
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
-        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null, null);
+        ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, new String[]{"property1"}, null, null, null);
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertTrue(response.getBody() instanceof QueryResponse);

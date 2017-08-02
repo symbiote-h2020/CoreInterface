@@ -100,6 +100,7 @@ public class CoreInterfaceController {
                                 @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
                                 @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
                                 @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
+                                @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
                                 @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader("X-Auth-Token") String token) {
 
         CoreQueryRequest queryRequest = new CoreQueryRequest();
@@ -114,6 +115,7 @@ public class CoreInterfaceController {
         queryRequest.setLocation_long(location_long);
         queryRequest.setMax_distance(max_distance);
         queryRequest.setResource_type(resource_type);
+        queryRequest.setShould_rank(should_rank);
         queryRequest.setToken(token);
         if (observed_property != null) {
             queryRequest.setObserved_property(Arrays.asList(observed_property));
