@@ -1,15 +1,16 @@
 package eu.h2020.symbiote.controllers;
 
 import eu.h2020.symbiote.communication.RabbitManager;
+import eu.h2020.symbiote.core.cci.ResourceRegistryResponse;
 import eu.h2020.symbiote.core.ci.QueryResponse;
 import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
-import eu.h2020.symbiote.security.constants.AAMConstants;
-import eu.h2020.symbiote.security.payloads.CheckRevocationResponse;
-import eu.h2020.symbiote.security.payloads.Credentials;
-import eu.h2020.symbiote.security.session.AAM;
+import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
+import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
+import eu.h2020.symbiote.security.communication.payloads.*;
 import io.swagger.annotations.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,6 +60,16 @@ public class CoreInterfaceController {
         this.restTemplate = new RestTemplate();
     }
 
+    private ResponseEntity handleBadSecurityHeaders(InvalidArgumentsException e) {
+        log.error("No proper security headers passed", e);
+        ResourceRegistryResponse response = new ResourceRegistryResponse();
+        response.setStatus(401);
+        response.setMessage("Invalid security headers");
+        response.setResources(null);
+
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
+    }
+
     /**
      * Endpoint for querying registered resources. Query parameters are passed via GET request params and are all
      * optional. When passing multiple parameters, including multiple observed_properties, they are all linked with
@@ -78,7 +89,7 @@ public class CoreInterfaceController {
      * @param observed_property property observed by resource; can be set multiple times to indicate more than one
      *                          observed property
      * @param resource_type     type of queried resource
-     * @param token             security token
+     * @param httpHeaders       request headers
      * @return query result as body or null along with appropriate error HTTP status code
      */
     @RequestMapping(method = RequestMethod.GET,
@@ -101,32 +112,40 @@ public class CoreInterfaceController {
                                 @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
                                 @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
                                 @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
-                                @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader("X-Auth-Token") String token) {
+                                @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
 
-        CoreQueryRequest queryRequest = new CoreQueryRequest();
-        queryRequest.setPlatform_id(platformId);
-        queryRequest.setPlatform_name(platformName);
-        queryRequest.setOwner(owner);
-        queryRequest.setName(name);
-        queryRequest.setId(id);
-        queryRequest.setDescription(description);
-        queryRequest.setLocation_name(location_name);
-        queryRequest.setLocation_lat(location_lat);
-        queryRequest.setLocation_long(location_long);
-        queryRequest.setMax_distance(max_distance);
-        queryRequest.setResource_type(resource_type);
-        queryRequest.setShould_rank(should_rank);
-        queryRequest.setToken(token);
-        if (observed_property != null) {
-            queryRequest.setObserved_property(Arrays.asList(observed_property));
+        try {
+            if (httpHeaders == null)
+                throw new InvalidArgumentsException();
+            SecurityRequest securityRequest = new SecurityRequest(httpHeaders.toSingleValueMap());
+
+            CoreQueryRequest queryRequest = new CoreQueryRequest();
+            queryRequest.setPlatform_id(platformId);
+            queryRequest.setPlatform_name(platformName);
+            queryRequest.setOwner(owner);
+            queryRequest.setName(name);
+            queryRequest.setId(id);
+            queryRequest.setDescription(description);
+            queryRequest.setLocation_name(location_name);
+            queryRequest.setLocation_lat(location_lat);
+            queryRequest.setLocation_long(location_long);
+            queryRequest.setMax_distance(max_distance);
+            queryRequest.setResource_type(resource_type);
+            queryRequest.setShould_rank(should_rank);
+            queryRequest.setSecurityRequest(securityRequest);
+            if (observed_property != null) {
+                queryRequest.setObserved_property(Arrays.asList(observed_property));
+            }
+
+            QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
+            if (resources == null) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>(resources, HttpStatus.OK);
+        } catch (InvalidArgumentsException e) {
+            return handleBadSecurityHeaders(e);
         }
-
-        QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
-        if (resources == null) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
     /**
@@ -137,7 +156,7 @@ public class CoreInterfaceController {
      * querying for URLs Interworking Services of resources of specified IDs.
      *
      * @param sparqlQuery query object containing sparql query and output format to get results in
-     * @param token       security token
+     * @param httpHeaders request headers
      */
     @ApiOperation(value = "Sparql query for resources",
             notes = "Search for resources using sparql query",
@@ -147,17 +166,25 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = URI_PREFIX + "/sparqlQuery")
     public ResponseEntity sparqlQuery(@ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
-                                      @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader("X-Auth-Token") String token) {
-        CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
-        request.setToken(token);
-        request.setQuery(sparqlQuery.getSparqlQuery());
-        request.setOutputFormat(sparqlQuery.getOutputFormat());
-        String resources = this.rabbitManager.sendSparqlSearchRequest(request);
-        if (resources == null) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+                                      @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+        try {
+            if (httpHeaders == null)
+                throw new InvalidArgumentsException();
+            SecurityRequest securityRequest = new SecurityRequest(httpHeaders.toSingleValueMap());
 
-        return new ResponseEntity<>(resources, HttpStatus.OK);
+            CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
+            request.setSecurityRequest(securityRequest);
+            request.setQuery(sparqlQuery.getSparqlQuery());
+            request.setOutputFormat(sparqlQuery.getOutputFormat());
+            String resources = this.rabbitManager.sendSparqlSearchRequest(request);
+            if (resources == null) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>(resources, HttpStatus.OK);
+        } catch (InvalidArgumentsException e) {
+            return handleBadSecurityHeaders(e);
+        }
     }
 
 
@@ -168,8 +195,8 @@ public class CoreInterfaceController {
      * have any means of communicate with resources' Interworking Interface. Therefore, it needs to send another request
      * querying for URLs Interworking Services of resources of specified IDs.
      *
-     * @param resourceId ID of a resource to get Interworking Interface URL; multiple IDs can be passed
-     * @param token      security token
+     * @param resourceId  ID of a resource to get Interworking Interface URL; multiple IDs can be passed
+     * @param httpHeaders request headers
      * @return map containing entries in a form of {"resourceId1":"InterworkingInterfaceUrl1", "resourceId2":"InterworkingInterface2", ... }
      */
     @ApiOperation(value = "Get resources' URLs",
@@ -183,147 +210,24 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.GET,
             value = URI_PREFIX + "/resourceUrls")
     public ResponseEntity getResourceUrls(@ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
-                                          @ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader("X-Auth-Token") String token) {
-        ResourceUrlsRequest request = new ResourceUrlsRequest();
-        request.setIdList(Arrays.asList(resourceId));
-        request.setToken(token);
-
-        Map<String, String> response = this.rabbitManager.sendResourceUrlsRequest(request);
-        if (response == null) {
-            return new ResponseEntity<>("", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    /**
-     * Endpoint for logging in to symbIoTe Core to obtain security token.
-     *
-     * @param user user credentials
-     * @return empty response with security token filled in header field
-     */
-    @ApiOperation(value = "Login to symbIoTe",
-            notes = "Login to symbIoTe core and obtain access token",
-            response = String.class
-            )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = Void.class, responseHeaders = @ResponseHeader(name = "X-Auth-Token", description = "A valid token issued by a member of the SymbIoTe Security Roaming", response = String.class)),
-            @ApiResponse(code = 400, message = "Username and/or password not supplied"),
-            @ApiResponse(code = 401, message = "Wrong username and/or password")})
-    @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + AAMConstants.AAM_LOGIN)
-    public ResponseEntity login(@ApiParam(name="Credentials", value = "User's login credentials", required = true) @RequestBody Credentials user) {
-        log.debug("Login request");
+                                          @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
         try {
-            ResponseEntity<String> entity = this.restTemplate.postForEntity(this.aamUrl + AAMConstants.AAM_LOGIN, user, String.class);
+            if (httpHeaders == null)
+                throw new InvalidArgumentsException();
+            SecurityRequest securityRequest = new SecurityRequest(httpHeaders.toSingleValueMap());
 
-            HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
+            ResourceUrlsRequest request = new ResourceUrlsRequest();
+            request.setIdList(Arrays.asList(resourceId));
+            request.setSecurityRequest(securityRequest);
 
-            return new ResponseEntity<>(entity.getBody(), headers, entity.getStatusCode());
-        } catch (HttpStatusCodeException e) {
-            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
-            log.debug(e);
-            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-        }
-    }
+            Map<String, String> response = this.rabbitManager.sendResourceUrlsRequest(request);
+            if (response == null) {
+                return new ResponseEntity<>("", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
-    /**
-     * Endpoint for reading CA certificate.
-     *
-     * @return CA certificate
-     */
-    @ApiOperation(value = "Get CA certificate",
-            notes = "Obtain certificate of certificate authority",
-            response = String.class
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
-    @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + AAMConstants.AAM_GET_CA_CERTIFICATE)
-    public ResponseEntity getCaCert() {
-        log.debug("Get CA Cert request");
-        try {
-            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + AAMConstants.AAM_GET_CA_CERTIFICATE, String.class);
-
-            HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
-
-            return new ResponseEntity<>(entity.getBody(), headers, entity.getStatusCode());
-        } catch (HttpStatusCodeException e) {
-            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
-            log.debug(e);
-            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-        }
-    }
-
-    /**
-     * Endpoint for requesting foreign token.
-     *
-     * @param token security token
-     * @return foreign token
-     */
-    @ApiOperation(value = "Request foreign token",
-            notes = "Request foreign token from AAM",
-            response = String.class
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = Void.class, responseHeaders = @ResponseHeader(name = "X-Auth-Token", description = "Requested foreign token", response = String.class)),
-            @ApiResponse(code = 400, message = "Request is not complete or not valid"),
-            @ApiResponse(code = 500, message = "Error on server side")})
-    @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN)
-    public ResponseEntity requestForeignToken(@ApiParam(value = "A valid token issued by a member of the SymbIoTe Security Roaming", required = true) @RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
-        log.debug("Foreign token request");
-        try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(AAMConstants.TOKEN_HEADER_NAME, token);
-
-            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
-
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + AAMConstants.AAM_REQUEST_FOREIGN_TOKEN, entity, String.class);
-
-            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
-
-            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
-        } catch (HttpStatusCodeException e) {
-            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
-            log.debug(e);
-            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-        }
-    }
-
-    /**
-     * Endpoint for checking token revocation.
-     *
-     * @param token security token
-     * @return status of token
-     */
-    @ApiOperation(value = "Check home token revocation",
-            notes = "Check home token revocation",
-            response = CheckRevocationResponse.class
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = CheckRevocationResponse.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
-    @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION)
-    public ResponseEntity checkHomeTokenRevocation(@ApiParam(value = "Token to be verified", required = true)@RequestHeader(AAMConstants.TOKEN_HEADER_NAME) String token) {
-        log.debug("Check Home Token revocation request");
-        try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(AAMConstants.TOKEN_HEADER_NAME, token);
-
-            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
-
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + AAMConstants.AAM_CHECK_HOME_TOKEN_REVOCATION, entity, String.class);
-
-            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
-
-            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
-        } catch (HttpStatusCodeException e) {
-            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
-            log.debug(e);
-            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (InvalidArgumentsException e) {
+            return handleBadSecurityHeaders(e);
         }
     }
 
@@ -336,14 +240,14 @@ public class CoreInterfaceController {
             notes = "Get list of available AAM instances"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = AAM.class, responseContainer = "List"),
+            @ApiResponse(code = 200, message = "OK", response = AvailableAAMsCollection.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + AAMConstants.AAM_GET_AVAILABLE_AAMS)
+            value = URI_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
     public ResponseEntity getAvailableAAMs() {
         log.debug("Get Available AAMS request");
         try {
-            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + AAMConstants.AAM_GET_AVAILABLE_AAMS, String.class);
+            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + SecurityConstants.AAM_GET_AVAILABLE_AAMS, String.class);
 
             HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
@@ -354,6 +258,276 @@ public class CoreInterfaceController {
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
     }
+
+    /**
+     * Endpoint for getting component certificate.
+     *
+     * @return component certificate
+     */
+    @ApiOperation(value = "Get component certificate",
+            notes = "Get component certificate"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.GET,
+            value = URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE)
+    public ResponseEntity getComponentCertificate() {
+        log.debug("Get component certificate request");
+        try {
+            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
+
+            return new ResponseEntity<>(entity.getBody(), headers, entity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for getting client certificate
+     *
+     * @param certificateRequest certificate request
+     * @return client certificate
+     */
+    @ApiOperation(value = "Get client certificate",
+            notes = "Get client certificate",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + SecurityConstants.AAM_GET_CLIENT_CERTIFICATE)
+    public ResponseEntity getClientCertificate(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
+        log.debug("Get client certificate");
+        try {
+            HttpEntity<CertificateRequest> entity = new HttpEntity<>(certificateRequest, null);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_CLIENT_CERTIFICATE, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for revoking token
+     *
+     * @param revocationRequest revocation request
+     * @return status of revocation
+     */
+    @ApiOperation(value = "Revoke token",
+            notes = "Revoke token",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + SecurityConstants.AAM_REVOKE)
+    public ResponseEntity revokeToken(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
+        log.debug("Revoke token");
+        try {
+            HttpEntity<RevocationRequest> entity = new HttpEntity<>(revocationRequest, null);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_REVOKE, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for getting guest token
+     *
+     * @return guest token
+     */
+    @ApiOperation(value = "Get guest token",
+            notes = "Get guest token",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + SecurityConstants.AAM_GET_GUEST_TOKEN)
+    public ResponseEntity getGuestToken() {
+        log.debug("Get guest token");
+        try {
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_GUEST_TOKEN, null, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for getting home token
+     *
+     * @param loginRequest login request
+     * @return home token
+     */
+    @ApiOperation(value = "Get home token",
+            notes = "Get home token",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + SecurityConstants.AAM_GET_HOME_TOKEN)
+    public ResponseEntity getHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
+        log.debug("Get home token");
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(SecurityConstants.TOKEN_HEADER_NAME, loginRequest);
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_HOME_TOKEN, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for getting foreign token
+     *
+     * @param remoteHomeToken   remote home token
+     * @param clientCertificate client certificate
+     * @param aamCertificate    AAM certificate
+     * @return foreign token
+     */
+    @ApiOperation(value = "Get foreign token",
+            notes = "Get foreign token",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+    public ResponseEntity getForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
+                                          @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                          @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+        log.debug("Get foreign token");
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(SecurityConstants.TOKEN_HEADER_NAME, remoteHomeToken);
+            httpHeaders.add(SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, clientCertificate);
+            httpHeaders.add(SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, aamCertificate);
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_FOREIGN_TOKEN, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for validating tokens and certificates
+     *
+     * @param token                                  token
+     * @param clientCertificate                      client certificate
+     * @param clientCertificateSigningAAMCertificate AAM certificate
+     * @param foreignTokenIssuingAAMCertificate      foreign token
+     * @return validation status
+     */
+    @ApiOperation(value = "Validate tokens and certificates",
+            notes = "Validate tokens and certificates",
+            response = ValidationStatus.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = ValidationStatus.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + SecurityConstants.AAM_VALIDATE)
+    public ResponseEntity validate(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
+                                   @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                   @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                   @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+        log.debug("Validate token/certificate");
+        try {
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(SecurityConstants.TOKEN_HEADER_NAME, token);
+            httpHeaders.add(SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, clientCertificate);
+            httpHeaders.add(SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, clientCertificateSigningAAMCertificate);
+            httpHeaders.add(SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, foreignTokenIssuingAAMCertificate);
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_VALIDATE, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for getting user details
+     *
+     * @return user details
+     */
+    @ApiOperation(value = "Get user details",
+            notes = "Get user details",
+            response = UserDetails.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = UserDetails.class),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = URI_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
+    public ResponseEntity getUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
+        log.debug("Get user details");
+        try {
+            HttpEntity<Credentials> entity = new HttpEntity<>(credentials, null);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_USER_DETAILS, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
 
     /**
      * Method used to strip 'Transfer-encoding' header and use 'Content-length' instead.
@@ -380,9 +554,10 @@ public class CoreInterfaceController {
 
     /**
      * Used to override RestTemplate used in request proxying with a mocked version for unit testing.
+     *
      * @param restTemplate
      */
-    public void setRestTemplate(RestTemplate restTemplate){
+    public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
