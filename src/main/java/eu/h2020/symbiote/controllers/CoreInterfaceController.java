@@ -65,7 +65,7 @@ public class CoreInterfaceController {
         ResourceRegistryResponse response = new ResourceRegistryResponse();
         response.setStatus(401);
         response.setMessage("Invalid security headers");
-        response.setResources(null);
+        response.setBody(null);
 
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
     }
@@ -174,7 +174,7 @@ public class CoreInterfaceController {
 
             CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
             request.setSecurityRequest(securityRequest);
-            request.setQuery(sparqlQuery.getSparqlQuery());
+            request.setBody(sparqlQuery.getSparqlQuery());
             request.setOutputFormat(sparqlQuery.getOutputFormat());
             String resources = this.rabbitManager.sendSparqlSearchRequest(request);
             if (resources == null) {
@@ -217,7 +217,7 @@ public class CoreInterfaceController {
             SecurityRequest securityRequest = new SecurityRequest(httpHeaders.toSingleValueMap());
 
             ResourceUrlsRequest request = new ResourceUrlsRequest();
-            request.setIdList(Arrays.asList(resourceId));
+            request.setBody(Arrays.asList(resourceId));
             request.setSecurityRequest(securityRequest);
 
             Map<String, String> response = this.rabbitManager.sendResourceUrlsRequest(request);
@@ -262,6 +262,8 @@ public class CoreInterfaceController {
     /**
      * Endpoint for getting component certificate.
      *
+     * @param componentIdentifier component identifier
+     * @param platformIdentifier  platform identifier
      * @return component certificate
      */
     @ApiOperation(value = "Get component certificate",
@@ -271,11 +273,12 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE)
-    public ResponseEntity getComponentCertificate() {
+            value = URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+    public ResponseEntity getComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
+                                                  @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
         log.debug("Get component certificate request");
         try {
-            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE, String.class);
+            ResponseEntity<String> entity = this.restTemplate.getForEntity(this.aamUrl + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/" + platformIdentifier + "/component/" + componentIdentifier, String.class);
 
             HttpHeaders headers = stripTransferEncoding(entity.getHeaders());
 
@@ -301,13 +304,13 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_CLIENT_CERTIFICATE)
-    public ResponseEntity getClientCertificate(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
+            value = URI_PREFIX + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+    public ResponseEntity signCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
         log.debug("Get client certificate");
         try {
             HttpEntity<CertificateRequest> entity = new HttpEntity<>(certificateRequest, null);
 
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_CLIENT_CERTIFICATE, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
@@ -333,13 +336,13 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_REVOKE)
-    public ResponseEntity revokeToken(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
+            value = URI_PREFIX + SecurityConstants.AAM_REVOKE_CREDENTIALS)
+    public ResponseEntity revokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
         log.debug("Revoke token");
         try {
             HttpEntity<RevocationRequest> entity = new HttpEntity<>(revocationRequest, null);
 
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_REVOKE, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_REVOKE_CREDENTIALS, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
@@ -471,11 +474,11 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = ValidationStatus.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_VALIDATE)
-    public ResponseEntity validate(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
-                                   @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                   @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
-                                   @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+            value = URI_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
+    public ResponseEntity validateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
+                                              @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                              @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                              @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
         log.debug("Validate token/certificate");
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -485,7 +488,7 @@ public class CoreInterfaceController {
             httpHeaders.add(SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, foreignTokenIssuingAAMCertificate);
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_VALIDATE, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_VALIDATE_CREDENTIALS, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 

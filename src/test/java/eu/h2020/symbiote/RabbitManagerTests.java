@@ -26,7 +26,7 @@ public class RabbitManagerTests {
         doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
-        request.setIdList(Collections.singletonList("123"));
+        request.setBody(Collections.singletonList("123"));
 
         Map<String, String> response = rabbitManager.sendResourceUrlsRequest(request);
 
@@ -40,7 +40,7 @@ public class RabbitManagerTests {
         doReturn("{}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
-        request.setIdList(Arrays.asList("123", "abc", "xyz"));
+        request.setBody(Arrays.asList("123", "abc", "xyz"));
 
         Map<String, String> response = rabbitManager.sendResourceUrlsRequest(request);
 
@@ -65,7 +65,7 @@ public class RabbitManagerTests {
         doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
-        request.setIdList(Arrays.asList("123", "abc", "xyz"));
+        request.setBody(Arrays.asList("123", "abc", "xyz"));
 
         Map<String, String> response = rabbitManager.sendResourceUrlsRequest(request);
 
