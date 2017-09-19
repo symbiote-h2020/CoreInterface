@@ -7,6 +7,8 @@ import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
+import eu.h2020.symbiote.core.internal.ResourceUrlsResponse;
+import eu.h2020.symbiote.core.model.AbstractResponseSecured;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
@@ -220,15 +222,23 @@ public class CoreInterfaceController {
             request.setBody(Arrays.asList(resourceId));
             request.setSecurityRequest(securityRequest);
 
-            Map<String, String> response = this.rabbitManager.sendResourceUrlsRequest(request);
+            ResourceUrlsResponse response = this.rabbitManager.sendResourceUrlsRequest(request);
             if (response == null) {
-                return new ResponseEntity<>("", HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>("", getServiceResponseHeaders(response), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, getServiceResponseHeaders(response), HttpStatus.valueOf(response.getStatus()));
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
         }
+    }
+
+    private HttpHeaders getServiceResponseHeaders( AbstractResponseSecured response ) {
+        HttpHeaders headers = new HttpHeaders();
+        if( response != null && response.getServiceResponse() != null ) {
+            headers.put(SecurityConstants.SECURITY_RESPONSE_HEADER, Arrays.asList(response.getServiceResponse()));
+        }
+        return headers;
     }
 
     /**

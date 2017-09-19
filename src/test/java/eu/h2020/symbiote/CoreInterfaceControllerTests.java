@@ -8,6 +8,7 @@ import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
+import eu.h2020.symbiote.core.internal.ResourceUrlsResponse;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.communication.payloads.*;
@@ -213,10 +214,16 @@ public class CoreInterfaceControllerTests {
     @Test
     public void testResourceUrls_3ids() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        Map<String, String> result = new HashMap<>();
+        ResourceUrlsResponse responseObject = new ResourceUrlsResponse();
+
+        HashMap<String, String> result = new HashMap<>();
         result.put("123", "http://example.com/123");
         result.put("abc", "http://example.com/abc");
         result.put("xyz", "http://example.com/xyz");
+
+        responseObject.setBody(result);
+        responseObject.setServiceResponse("serviceResponse");
+        responseObject.setStatus(200);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
@@ -227,15 +234,17 @@ public class CoreInterfaceControllerTests {
                 "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
                 "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
 
-        when(rabbitManager.sendResourceUrlsRequest((ResourceUrlsRequest) notNull())).thenReturn(result);
+        when(rabbitManager.sendResourceUrlsRequest((ResourceUrlsRequest) notNull())).thenReturn(responseObject);
 
         CoreInterfaceController controller = new CoreInterfaceController(rabbitManager);
 
         ResponseEntity response = controller.getResourceUrls(new String[]{"123", "abc", "xyz"}, headers);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody() instanceof Map);
-        assertEquals(3, ((Map) response.getBody()).size());
+        assertNotNull(response.getHeaders());
+        assertTrue(response.getHeaders().containsKey(SecurityConstants.SECURITY_RESPONSE_HEADER));
+        assertTrue(response.getBody() instanceof ResourceUrlsResponse);
+        assertEquals(3, ((ResourceUrlsResponse) response.getBody()).getBody().size());
     }
 
     @Test
