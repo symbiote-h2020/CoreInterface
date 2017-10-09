@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.3.RELEASE'
+        springBootVersion = '1.5.7.RELEASE'
         asciiDocOutputDir = file("${buildDir}/asciidoc/generated")
         swaggerOutputDir = file("${buildDir}/swagger")
         snippetsOutputDir = file("${buildDir}/asciidoc/snippets")
@@ -44,7 +44,7 @@ apply plugin: 'org.asciidoctor.convert'
 apply plugin: 'io.github.swagger2markup'
 
 // XXX please change with your commits according to http://semver.org/
-project.version = '0.2.0'
+project.version = '1.0.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -60,7 +60,7 @@ repositories {
 // Spring related configs
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.RELEASE"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.SR4"
     }
 }
 
@@ -88,7 +88,8 @@ dependencies {
             3) project dependency requires changes in settings.gradle file in this project
             4) never commit build.gradle which has project dependencies active as it will break CI builds
     */
-    compile('com.github.symbiote-h2020:SymbIoTeLibraries:develop-SNAPSHOT') { changing = true }
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:1.+') { changing = true }
+    compile('com.github.symbiote-h2020:SymbIoTeSecurity:21.+') { changing = true }
 
     // Spring
     compile('org.springframework.cloud:spring-cloud-starter-config')
