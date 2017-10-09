@@ -5,13 +5,13 @@ import eu.h2020.symbiote.core.ci.QueryResponse;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.ResourceUrlsRequest;
+import eu.h2020.symbiote.core.internal.ResourceUrlsResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -26,9 +26,9 @@ public class RabbitManagerTests {
         doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
-        request.setIdList(Collections.singletonList("123"));
+        request.setBody(Collections.singletonList("123"));
 
-        Map<String, String> response = rabbitManager.sendResourceUrlsRequest(request);
+        ResourceUrlsResponse response = rabbitManager.sendResourceUrlsRequest(request);
 
         assertNull(response);
     }
@@ -37,16 +37,16 @@ public class RabbitManagerTests {
     public void testSendResourceUrls_emptyList() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn("{}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+        doReturn("{\"body\":{}}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
-        request.setIdList(Arrays.asList("123", "abc", "xyz"));
+        request.setBody(Arrays.asList("123", "abc", "xyz"));
 
-        Map<String, String> response = rabbitManager.sendResourceUrlsRequest(request);
+        ResourceUrlsResponse response = rabbitManager.sendResourceUrlsRequest(request);
 
         assertNotNull(response);
-        assertTrue(response instanceof Map);
-        assertEquals(0, response.size());
+        assertTrue(response instanceof ResourceUrlsResponse);
+        assertEquals(0, response.getBody().size());
     }
 
 
@@ -55,29 +55,29 @@ public class RabbitManagerTests {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
         String jsonResponse = new String();
-        jsonResponse += "{" +
+        jsonResponse += "{\"body\":{" +
                 "\"123\":\"http://example.com/123\"," +
                 "\"abc\":\"http://example.com/abc\"," +
                 "\"xyz\":\"http://example.com/xyz\"" +
-                "}";
+                "}}";
 
 
         doReturn(jsonResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         ResourceUrlsRequest request = new ResourceUrlsRequest();
-        request.setIdList(Arrays.asList("123", "abc", "xyz"));
+        request.setBody(Arrays.asList("123", "abc", "xyz"));
 
-        Map<String, String> response = rabbitManager.sendResourceUrlsRequest(request);
+        ResourceUrlsResponse response = rabbitManager.sendResourceUrlsRequest(request);
 
         assertNotNull(response);
-        assertTrue(response instanceof Map);
-        assertEquals(3, response.size());
-        assertTrue(response.containsKey("123"));
-        assertTrue(response.containsKey("abc"));
-        assertTrue(response.containsKey("xyz"));
-        assertEquals("http://example.com/123", response.get("123"));
-        assertEquals("http://example.com/abc", response.get("abc"));
-        assertEquals("http://example.com/xyz", response.get("xyz"));
+        assertTrue(response instanceof ResourceUrlsResponse);
+        assertEquals(3, response.getBody().size());
+        assertTrue(response.getBody().containsKey("123"));
+        assertTrue(response.getBody().containsKey("abc"));
+        assertTrue(response.getBody().containsKey("xyz"));
+        assertEquals("http://example.com/123", response.getBody().get("123"));
+        assertEquals("http://example.com/abc", response.getBody().get("abc"));
+        assertEquals("http://example.com/xyz", response.getBody().get("xyz"));
     }
 
     @Test
