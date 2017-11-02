@@ -1,7 +1,10 @@
 package eu.h2020.symbiote;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.h2020.symbiote.communication.RabbitManager;
 import eu.h2020.symbiote.core.ci.QueryResponse;
+import eu.h2020.symbiote.core.ci.SparqlQueryResponse;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
@@ -97,13 +100,13 @@ public class RabbitManagerTests {
     public void testSendSearchRequest_emptyResult() {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn("{\"resources\":[]}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+        doReturn("{\"body\":[]}").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         CoreQueryRequest request = new CoreQueryRequest();
         QueryResponse response = rabbitManager.sendSearchRequest(request);
 
         assertNotNull(response);
-        assertEquals(0, response.getResources().size());
+        assertEquals(0, response.getBody().size());
     }
 
     @Test
@@ -112,7 +115,7 @@ public class RabbitManagerTests {
 
         String jsonResponse = new String();
         jsonResponse += "{" +
-                "\"resources\":[" +
+                "\"body\":[" +
                 "{" +
                 "\"name\" : \"res1\"" +
                 "}," +
@@ -131,10 +134,10 @@ public class RabbitManagerTests {
         QueryResponse response = rabbitManager.sendSearchRequest(request);
 
         assertNotNull(response);
-        assertEquals(3, response.getResources().size());
-        assertEquals("res1", response.getResources().get(0).getName());
-        assertEquals("res2", response.getResources().get(1).getName());
-        assertEquals("res3", response.getResources().get(2).getName());
+        assertEquals(3, response.getBody().size());
+        assertEquals("res1", response.getBody().get(0).getName());
+        assertEquals("res2", response.getBody().get(1).getName());
+        assertEquals("res3", response.getBody().get(2).getName());
     }
 
     @Test
@@ -144,38 +147,43 @@ public class RabbitManagerTests {
         doReturn(null).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
-        String response = rabbitManager.sendSparqlSearchRequest(request);
+        SparqlQueryResponse response = rabbitManager.sendSparqlSearchRequest(request);
 
         assertNull(response);
 
     }
 
     @Test
-    public void testSendSparqlSearchRequest_emptyResult() {
+    public void testSendSparqlSearchRequest_emptyResult() throws JsonProcessingException {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        doReturn("").when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+        SparqlQueryResponse rdfResponse = new SparqlQueryResponse(200,"OK","");
+        ObjectMapper mapper = new ObjectMapper();
+        doReturn(mapper.writeValueAsString(rdfResponse)).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
-        String response = rabbitManager.sendSparqlSearchRequest(request);
+        SparqlQueryResponse response = rabbitManager.sendSparqlSearchRequest(request);
 
         assertNotNull(response);
-        assertEquals(0, response.length());
+        assertEquals(0, response.getBody().length());
     }
 
     @Test
-    public void testSendSparqlSearchRequest_3results() {
+    public void testSendSparqlSearchRequest_3results() throws JsonProcessingException {
         RabbitManager rabbitManager = spy(new RabbitManager());
 
-        String rdfResponse = "RDF resources";
+        SparqlQueryResponse rdfResponse = new SparqlQueryResponse(200,"OK","RDF resources");
+        ObjectMapper mapper = new ObjectMapper();
 
-        doReturn(rdfResponse).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
+
+        doReturn(mapper.writeValueAsString(rdfResponse)).when(rabbitManager).sendRpcMessage(any(), any(), any(), any());
 
         CoreSparqlQueryRequest request = new CoreSparqlQueryRequest();
-        String response = rabbitManager.sendSparqlSearchRequest(request);
+        SparqlQueryResponse response = rabbitManager.sendSparqlSearchRequest(request);
 
         assertNotNull(response);
-        assertEquals(13, response.length());
+        assertNotNull(response.getBody());
+        assertEquals(13, response.getBody().length());
     }
 
 

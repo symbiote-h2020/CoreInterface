@@ -145,7 +145,7 @@ public class CoreInterfaceController {
                 return new ResponseEntity<>(null, getServiceResponseHeaders(resources),HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity<>(resources, getServiceResponseHeaders(resources), HttpStatus.OK);
+            return new ResponseEntity<>(resources, getServiceResponseHeaders(resources), HttpStatus.valueOf(resources.getStatus()));
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
         }
@@ -184,7 +184,7 @@ public class CoreInterfaceController {
                 return new ResponseEntity<>(null, getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity<>(sparqlQueryResponse,getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.OK);
+            return new ResponseEntity<>(sparqlQueryResponse,getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.valueOf(sparqlQueryResponse.getStatus()));
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
         }

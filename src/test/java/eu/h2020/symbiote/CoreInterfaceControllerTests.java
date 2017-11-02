@@ -5,6 +5,7 @@ import eu.h2020.symbiote.controllers.CoreInterfaceController;
 import eu.h2020.symbiote.core.ci.QueryResourceResult;
 import eu.h2020.symbiote.core.ci.QueryResponse;
 import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
+import eu.h2020.symbiote.core.ci.SparqlQueryResponse;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
@@ -67,7 +68,7 @@ public class CoreInterfaceControllerTests {
     @Test
     public void testQuery_emptyResults() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        when(rabbitManager.sendSearchRequest((CoreQueryRequest) notNull())).thenReturn(new QueryResponse());
+        when(rabbitManager.sendSearchRequest((CoreQueryRequest) notNull())).thenReturn(new QueryResponse(200,"",new ArrayList<QueryResourceResult>()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
@@ -84,13 +85,13 @@ public class CoreInterfaceControllerTests {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody() instanceof QueryResponse);
-        assertEquals(0, ((QueryResponse) response.getBody()).getResources().size());
+        assertEquals(0, ((QueryResponse) response.getBody()).getBody().size());
     }
 
     @Test
     public void testQuery_3results() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        QueryResponse resourceList = new QueryResponse();
+        QueryResponse resourceList = new QueryResponse(200,"",new ArrayList<>());
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
@@ -140,9 +141,9 @@ public class CoreInterfaceControllerTests {
         resource3.setLocationAltitude(80.0);
         resource3.setObservedProperties(Arrays.asList("Temp", "Hum"));
 
-        resourceList.getResources().add(resource1);
-        resourceList.getResources().add(resource2);
-        resourceList.getResources().add(resource3);
+        resourceList.getBody().add(resource1);
+        resourceList.getBody().add(resource2);
+        resourceList.getBody().add(resource3);
 
         when(rabbitManager.sendSearchRequest((CoreQueryRequest) notNull())).thenReturn(resourceList);
 
@@ -152,7 +153,7 @@ public class CoreInterfaceControllerTests {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody() instanceof QueryResponse);
-        assertEquals(3, ((QueryResponse) response.getBody()).getResources().size());
+        assertEquals(3, ((QueryResponse) response.getBody()).getBody().size());
     }
 
     @Test
@@ -283,7 +284,7 @@ public class CoreInterfaceControllerTests {
     @Test
     public void testSparqlQuery_emptyResults() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
-        when(rabbitManager.sendSparqlSearchRequest((CoreSparqlQueryRequest) notNull())).thenReturn(new String());
+        when(rabbitManager.sendSparqlSearchRequest((CoreSparqlQueryRequest) notNull())).thenReturn(new SparqlQueryResponse(200,"",""));
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
@@ -299,16 +300,17 @@ public class CoreInterfaceControllerTests {
         ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(), headers);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody() instanceof String);
-        assertEquals(0, ((String) response.getBody()).length());
+        assertTrue(response.getBody() instanceof SparqlQueryResponse);
+        assertEquals(0, ((SparqlQueryResponse) response.getBody()).getBody().length());
     }
 
     @Test
     public void testSparqlQuery_3results() {
         RabbitManager rabbitManager = Mockito.mock(RabbitManager.class);
         String rdfResources = "RDF resources";
+        SparqlQueryResponse sparqlResponse = new SparqlQueryResponse(200,"OK",rdfResources);
 
-        when(rabbitManager.sendSparqlSearchRequest((CoreSparqlQueryRequest) notNull())).thenReturn(rdfResources);
+        when(rabbitManager.sendSparqlSearchRequest((CoreSparqlQueryRequest) notNull())).thenReturn(sparqlResponse);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
@@ -324,8 +326,8 @@ public class CoreInterfaceControllerTests {
         ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(), headers);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody() instanceof String);
-        assertEquals(13, ((String) response.getBody()).length());
+        assertTrue(response.getBody() instanceof SparqlQueryResponse);
+        assertEquals(13, ((SparqlQueryResponse) response.getBody()).getBody().length());
     }
 
     @Test
