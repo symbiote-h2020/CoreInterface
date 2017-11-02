@@ -5,6 +5,7 @@ import eu.h2020.symbiote.core.cci.AbstractResponseSecured;
 import eu.h2020.symbiote.core.cci.ResourceRegistryResponse;
 import eu.h2020.symbiote.core.ci.QueryResponse;
 import eu.h2020.symbiote.core.ci.SparqlQueryRequest;
+import eu.h2020.symbiote.core.ci.SparqlQueryResponse;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
@@ -141,10 +142,10 @@ public class CoreInterfaceController {
 
             QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
             if (resources == null) {
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(null, getServiceResponseHeaders(resources),HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity<>(resources, HttpStatus.OK);
+            return new ResponseEntity<>(resources, getServiceResponseHeaders(resources), HttpStatus.OK);
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
         }
@@ -178,12 +179,12 @@ public class CoreInterfaceController {
             request.setSecurityRequest(securityRequest);
             request.setBody(sparqlQuery.getSparqlQuery());
             request.setOutputFormat(sparqlQuery.getOutputFormat());
-            String resources = this.rabbitManager.sendSparqlSearchRequest(request);
-            if (resources == null) {
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            SparqlQueryResponse sparqlQueryResponse = this.rabbitManager.sendSparqlSearchRequest(request);
+            if (sparqlQueryResponse == null) {
+                return new ResponseEntity<>(null, getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity<>(resources, HttpStatus.OK);
+            return new ResponseEntity<>(sparqlQueryResponse,getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.OK);
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
         }

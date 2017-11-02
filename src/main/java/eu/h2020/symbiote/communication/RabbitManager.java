@@ -3,6 +3,7 @@ package eu.h2020.symbiote.communication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 import eu.h2020.symbiote.core.ci.QueryResponse;
+import eu.h2020.symbiote.core.ci.SparqlQueryResponse;
 import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
@@ -301,12 +302,15 @@ public class RabbitManager {
      * @param request request object describing sparql query parameters
      * @return response string of requested resources, or null when timeout occurs
      */
-    public String sendSparqlSearchRequest(CoreSparqlQueryRequest request) {
+    public SparqlQueryResponse sendSparqlSearchRequest(CoreSparqlQueryRequest request) {
         try {
             log.info("Request for resource sparql query");
             ObjectMapper mapper = new ObjectMapper();
             String message = mapper.writeValueAsString(request);
-            return sendRpcMessage(this.resourceExchangeName, this.resourceSparqlSearchRequestedRoutingKey, message, request.getClass().getCanonicalName());
+            String response = sendRpcMessage(this.resourceExchangeName, this.resourceSparqlSearchRequestedRoutingKey, message, request.getClass().getCanonicalName());
+            if (response == null)
+                return null;
+            return mapper.readValue(response, SparqlQueryResponse.class);
         } catch (IOException e) {
             log.error(CORE_PARSE_ERROR_MSG, e);
         }
