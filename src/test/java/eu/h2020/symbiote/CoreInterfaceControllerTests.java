@@ -10,6 +10,7 @@ import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsResponse;
+import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.communication.payloads.*;
@@ -335,8 +336,8 @@ public class CoreInterfaceControllerTests {
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
         List<AAM> aamsList = new ArrayList<>();
-        aamsList.add(new AAM());
-        aamsList.add(new AAM());
+        aamsList.add(new AAM("localhost","localhost","localhost",null,new HashMap<String, Certificate>()));
+        aamsList.add(new AAM("localhost2","localhost2","localhost2",null,new HashMap<String, Certificate>()));
 
         ResponseEntity response = new ResponseEntity(aamsList, HttpStatus.OK);
 
