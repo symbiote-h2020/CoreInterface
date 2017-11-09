@@ -215,7 +215,7 @@ public class RabbitManager {
 
             this.channel.basicPublish(exchangeName, routingKey, props, message.getBytes());
             while (true) {
-                QueueingConsumer.Delivery delivery = consumer.nextDelivery(20000);
+                QueueingConsumer.Delivery delivery = consumer.nextDelivery(40000);
                 if (delivery == null) {
                     log.info("Timeout in response retrieval");
                     return null;
