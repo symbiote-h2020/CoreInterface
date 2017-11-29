@@ -41,7 +41,7 @@ import java.util.Map;
 @CrossOrigin
 @Api(tags = "Core Interface Controller", description = "Operations of Core Interface Controller")
 public class CoreInterfaceController {
-    private static final String URI_PREFIX = "/coreInterface/v1";
+    private static final String LEGACY_URI_PREFIX = "/coreInterface/v1";
     private static final String ERROR_PROXY_STATUS_MSG = "Error status code in proxy communication: ";
 
     public static final Log log = LogFactory.getLog(CoreInterfaceController.class);
@@ -73,6 +73,26 @@ public class CoreInterfaceController {
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.GET,
+            value = LEGACY_URI_PREFIX + "/query")
+    public ResponseEntity legacyQuery(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platformId,
+                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platformName,
+                                      @ApiParam(value = "owner of a platform that resource belongs to") @RequestParam(value = "owner", required = false) String owner,
+                                      @ApiParam(value = "name of a resource") @RequestParam(value = "name", required = false) String name,
+                                      @ApiParam(value = "ID of a resource") @RequestParam(value = "id", required = false) String id,
+                                      @ApiParam(value = "description of a resource") @RequestParam(value = "description", required = false) String description,
+                                      @ApiParam(value = "name of resource's location") @RequestParam(value = "location_name", required = false) String location_name,
+                                      @ApiParam(value = "latitude of resource's location") @RequestParam(value = "location_lat", required = false) Double location_lat,
+                                      @ApiParam(value = "longitude of resource's location") @RequestParam(value = "location_long", required = false) Double location_long,
+                                      @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
+                                      @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                      @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
+                                      @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
+                                      @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+        return query(platformId, platformName, owner, name, id, description, location_name, location_lat, location_long, max_distance, observed_property, resource_type, should_rank, httpHeaders);
+    }
+
     /**
      * Endpoint for querying registered resources. Query parameters are passed via GET request params and are all
      * optional. When passing multiple parameters, including multiple observed_properties, they are all linked with
@@ -96,7 +116,7 @@ public class CoreInterfaceController {
      * @return query result as body or null along with appropriate error HTTP status code
      */
     @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + "/query")
+            value = "/query")
     @ApiOperation(value = "Query for resources",
             notes = "Search for resources using defined query parameters",
             response = QueryResponse.class)
@@ -142,13 +162,21 @@ public class CoreInterfaceController {
 
             QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
             if (resources == null) {
-                return new ResponseEntity<>(null, getServiceResponseHeaders(resources),HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(null, getServiceResponseHeaders(resources), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             return new ResponseEntity<>(resources, getServiceResponseHeaders(resources), HttpStatus.valueOf(resources.getStatus()));
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
         }
+    }
+
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + "/sparqlQuery")
+    public ResponseEntity legacySparqlQuery(@ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
+                                            @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+        return sparqlQuery(sparqlQuery, httpHeaders);
     }
 
     /**
@@ -167,7 +195,7 @@ public class CoreInterfaceController {
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "Query execution error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + "/sparqlQuery")
+            value = "/sparqlQuery")
     public ResponseEntity sparqlQuery(@ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
                                       @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
         try {
@@ -184,12 +212,19 @@ public class CoreInterfaceController {
                 return new ResponseEntity<>(null, getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity<>(sparqlQueryResponse,getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.valueOf(sparqlQueryResponse.getStatus()));
+            return new ResponseEntity<>(sparqlQueryResponse, getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.valueOf(sparqlQueryResponse.getStatus()));
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
         }
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.GET,
+            value = LEGACY_URI_PREFIX + "/resourceUrls")
+    public ResponseEntity legacyGetResourceUrls(@ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
+                                                @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+        return getResourceUrls(resourceId, httpHeaders);
+    }
 
     /**
      * Endpoint for querying URL of resources' Interworking Interface.
@@ -211,7 +246,7 @@ public class CoreInterfaceController {
 
     })
     @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + "/resourceUrls")
+            value = "/resourceUrls")
     public ResponseEntity getResourceUrls(@ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
                                           @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
         try {
@@ -234,12 +269,19 @@ public class CoreInterfaceController {
         }
     }
 
-    private HttpHeaders getServiceResponseHeaders( AbstractResponseSecured response ) {
+    private HttpHeaders getServiceResponseHeaders(AbstractResponseSecured response) {
         HttpHeaders headers = new HttpHeaders();
-        if( response != null && response.getServiceResponse() != null ) {
+        if (response != null && response.getServiceResponse() != null) {
             headers.put(SecurityConstants.SECURITY_RESPONSE_HEADER, Arrays.asList(response.getServiceResponse()));
         }
         return headers;
+    }
+
+    @Deprecated
+    @RequestMapping(method = RequestMethod.GET,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
+    public ResponseEntity legacyGetAvailableAAMs() {
+        return getAvailableAAMs();
     }
 
     /**
@@ -254,7 +296,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = AvailableAAMsCollection.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
+            value = SecurityConstants.AAM_GET_AVAILABLE_AAMS)
     public ResponseEntity getAvailableAAMs() {
         log.debug("Get Available AAMS request");
         try {
@@ -268,6 +310,14 @@ public class CoreInterfaceController {
             log.debug(e);
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
+    }
+
+    @Deprecated
+    @RequestMapping(method = RequestMethod.GET,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+    public ResponseEntity legacyGetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
+                                                  @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
+        return getComponentCertificate(componentIdentifier, platformIdentifier);
     }
 
     /**
@@ -284,7 +334,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+            value = SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
     public ResponseEntity getComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
                                                   @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
         log.debug("Get component certificate request");
@@ -301,6 +351,13 @@ public class CoreInterfaceController {
         }
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+    public ResponseEntity legacySignCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
+        return signCertificateRequest(certificateRequest);
+    }
+
     /**
      * Endpoint for getting client certificate
      *
@@ -315,7 +372,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+            value = SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
     public ResponseEntity signCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
         log.debug("Get client certificate");
         try {
@@ -333,6 +390,13 @@ public class CoreInterfaceController {
         }
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_REVOKE_CREDENTIALS)
+    public ResponseEntity legacyRevokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
+        return revokeCredentials(revocationRequest);
+    }
+
     /**
      * Endpoint for revoking token
      *
@@ -347,7 +411,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_REVOKE_CREDENTIALS)
+            value = SecurityConstants.AAM_REVOKE_CREDENTIALS)
     public ResponseEntity revokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
         log.debug("Revoke token");
         try {
@@ -365,6 +429,13 @@ public class CoreInterfaceController {
         }
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_GUEST_TOKEN)
+    public ResponseEntity legacyGetGuestToken() {
+        return getGuestToken();
+    }
+
     /**
      * Endpoint for getting guest token
      *
@@ -378,7 +449,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_GUEST_TOKEN)
+            value = SecurityConstants.AAM_GET_GUEST_TOKEN)
     public ResponseEntity getGuestToken() {
         log.debug("Get guest token");
         try {
@@ -392,6 +463,13 @@ public class CoreInterfaceController {
             log.debug(e);
             return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
         }
+    }
+
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_HOME_TOKEN)
+    public ResponseEntity legacyGetHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
+        return getHomeToken(loginRequest);
     }
 
     /**
@@ -408,7 +486,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_HOME_TOKEN)
+            value = SecurityConstants.AAM_GET_HOME_TOKEN)
     public ResponseEntity getHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
         log.debug("Get home token");
         try {
@@ -428,6 +506,16 @@ public class CoreInterfaceController {
         }
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+    public ResponseEntity legacyGetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
+                                          @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                          @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+        return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
+    }
+
+
     /**
      * Endpoint for getting foreign token
      *
@@ -444,7 +532,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+            value = SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     public ResponseEntity getForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
                                           @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
                                           @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
@@ -468,6 +556,16 @@ public class CoreInterfaceController {
         }
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
+    public ResponseEntity legacyValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
+                                              @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                              @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                              @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+        return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
+    }
+
     /**
      * Endpoint for validating tokens and certificates
      *
@@ -485,7 +583,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = ValidationStatus.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
+            value = SecurityConstants.AAM_VALIDATE_CREDENTIALS)
     public ResponseEntity validateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
                                               @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
                                               @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
@@ -511,6 +609,13 @@ public class CoreInterfaceController {
         }
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
+    public ResponseEntity legacyGetUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
+        return getUserDetails(credentials);
+    }
+
     /**
      * Endpoint for getting user details
      *
@@ -524,7 +629,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = UserDetails.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = URI_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
+            value = SecurityConstants.AAM_GET_USER_DETAILS)
     public ResponseEntity getUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
         log.debug("Get user details");
         try {
