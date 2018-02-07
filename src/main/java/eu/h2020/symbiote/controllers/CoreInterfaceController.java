@@ -90,7 +90,7 @@ public class CoreInterfaceController {
                                       @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
                                       @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
                                       @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
-        return query(platformId, platformName, owner, name, id, description, location_name, location_lat, location_long, max_distance, observed_property, resource_type, should_rank, httpHeaders);
+        return query(platformId, platformName, owner, name, id, description, location_name, location_lat, location_long, max_distance, observed_property, null, resource_type, should_rank, httpHeaders);
     }
 
     /**
@@ -133,6 +133,7 @@ public class CoreInterfaceController {
                                 @ApiParam(value = "longitude of resource's location") @RequestParam(value = "location_long", required = false) Double location_long,
                                 @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
                                 @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                @ApiParam(value = "recource's observed property by using full IRI; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property_iri", required = false) String[] observed_property_iri,
                                 @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
                                 @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
                                 @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
@@ -158,6 +159,9 @@ public class CoreInterfaceController {
             queryRequest.setSecurityRequest(securityRequest);
             if (observed_property != null) {
                 queryRequest.setObserved_property(Arrays.asList(observed_property));
+            }
+            if (observed_property_iri != null) {
+                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri));
             }
 
             QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
