@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Class defining all REST endpoints.
@@ -161,7 +162,7 @@ public class CoreInterfaceController {
                 queryRequest.setObserved_property(Arrays.asList(observed_property));
             }
             if (observed_property_iri != null) {
-                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri));
+                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s->s.replaceAll("%23","#")).collect(Collectors.toList()));
             }
 
             QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
