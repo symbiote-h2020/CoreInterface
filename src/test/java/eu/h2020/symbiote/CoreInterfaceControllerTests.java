@@ -10,6 +10,7 @@ import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsResponse;
+import eu.h2020.symbiote.model.cim.Property;
 import eu.h2020.symbiote.security.commons.Certificate;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
@@ -103,6 +104,9 @@ public class CoreInterfaceControllerTests {
                 "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
                 "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
 
+        Property property1 = new Property("property1","iriProperty1", Arrays.asList("description"));
+        Property property2 = new Property("property2","iriProperty2", Arrays.asList("description"));
+
         QueryResourceResult resource1 = new QueryResourceResult();
         resource1.setPlatformId("platform1");
         resource1.setPlatformName("Platform 1");
@@ -114,7 +118,7 @@ public class CoreInterfaceControllerTests {
         resource1.setLocationLatitude(52.407193);
         resource1.setLocationLongitude(16.953494);
         resource1.setLocationAltitude(80.0);
-        resource1.setObservedProperties(Arrays.asList("Temp", "Hum"));
+        resource1.setObservedProperties(Arrays.asList(property1, property2));
 
         QueryResourceResult resource2 = new QueryResourceResult();
         resource2.setPlatformId("platform1");
@@ -127,7 +131,7 @@ public class CoreInterfaceControllerTests {
         resource2.setLocationLatitude(52.407193);
         resource2.setLocationLongitude(16.953494);
         resource2.setLocationAltitude(80.0);
-        resource2.setObservedProperties(Collections.singletonList("CO2"));
+        resource2.setObservedProperties(Arrays.asList(property1, property2));
 
         QueryResourceResult resource3 = new QueryResourceResult();
         resource3.setPlatformId("platform2");
@@ -140,7 +144,7 @@ public class CoreInterfaceControllerTests {
         resource3.setLocationLatitude(52.407193);
         resource3.setLocationLongitude(16.953494);
         resource3.setLocationAltitude(80.0);
-        resource3.setObservedProperties(Arrays.asList("Temp", "Hum"));
+        resource3.setObservedProperties(Arrays.asList(property1, property2));
 
         resourceList.getBody().add(resource1);
         resourceList.getBody().add(resource2);
