@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 public class CoreInterfaceController {
     private static final String LEGACY_URI_PREFIX = "/coreInterface/v1";
     private static final String ERROR_PROXY_STATUS_MSG = "Error status code in proxy communication: ";
+    private static final String ERROR_GATEWAY_TIMEOUT = "Timeout occured when contacting symbIoTe Core services";
 
     public static final Log log = LogFactory.getLog(CoreInterfaceController.class);
 
@@ -162,12 +163,12 @@ public class CoreInterfaceController {
                 queryRequest.setObserved_property(Arrays.asList(observed_property));
             }
             if (observed_property_iri != null) {
-                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s->s.replaceAll("%23","#")).collect(Collectors.toList()));
+                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s -> s.replaceAll("%23", "#")).collect(Collectors.toList()));
             }
 
             QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
             if (resources == null) {
-                return new ResponseEntity<>(null, getServiceResponseHeaders(resources), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(new QueryResponse(HttpStatus.GATEWAY_TIMEOUT.value(), ERROR_GATEWAY_TIMEOUT, null), getServiceResponseHeaders(resources), HttpStatus.GATEWAY_TIMEOUT);
             }
 
             return new ResponseEntity<>(resources, getServiceResponseHeaders(resources), HttpStatus.valueOf(resources.getStatus()));
@@ -214,7 +215,7 @@ public class CoreInterfaceController {
             request.setOutputFormat(sparqlQuery.getOutputFormat());
             SparqlQueryResponse sparqlQueryResponse = this.rabbitManager.sendSparqlSearchRequest(request);
             if (sparqlQueryResponse == null) {
-                return new ResponseEntity<>(null, getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(new SparqlQueryResponse(HttpStatus.GATEWAY_TIMEOUT.value(), ERROR_GATEWAY_TIMEOUT, null), getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.GATEWAY_TIMEOUT);
             }
 
             return new ResponseEntity<>(sparqlQueryResponse, getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.valueOf(sparqlQueryResponse.getStatus()));
@@ -265,7 +266,7 @@ public class CoreInterfaceController {
 
             ResourceUrlsResponse response = this.rabbitManager.sendResourceUrlsRequest(request);
             if (response == null) {
-                return new ResponseEntity<>("", getServiceResponseHeaders(response), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(new ResourceUrlsResponse(HttpStatus.GATEWAY_TIMEOUT.value(), ERROR_GATEWAY_TIMEOUT, null), getServiceResponseHeaders(response), HttpStatus.GATEWAY_TIMEOUT);
             }
 
             return new ResponseEntity<>(response, getServiceResponseHeaders(response), HttpStatus.valueOf(response.getStatus()));
@@ -321,7 +322,7 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.GET,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
     public ResponseEntity legacyGetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
-                                                  @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
+                                                        @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
         return getComponentCertificate(componentIdentifier, platformIdentifier);
     }
 
@@ -515,8 +516,8 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     public ResponseEntity legacyGetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
-                                          @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                          @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+                                                @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
         return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
     }
 
@@ -565,9 +566,9 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
     public ResponseEntity legacyValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
-                                              @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                              @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
-                                              @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+                                                    @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                    @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                                    @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
         return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
     }
 
