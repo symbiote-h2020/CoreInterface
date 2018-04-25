@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -159,10 +161,10 @@ public class CoreInterfaceController {
             queryRequest.setShould_rank(should_rank);
             queryRequest.setSecurityRequest(securityRequest);
             if (observed_property != null) {
-                queryRequest.setObserved_property(Arrays.asList(observed_property));
+                queryRequest.setObserved_property(Arrays.asList(observed_property).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
             }
             if (observed_property_iri != null) {
-                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s->s.replaceAll("%23","#")).collect(Collectors.toList()));
+                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
             }
 
             QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
@@ -321,7 +323,7 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.GET,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
     public ResponseEntity legacyGetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
-                                                  @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
+                                                        @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
         return getComponentCertificate(componentIdentifier, platformIdentifier);
     }
 
@@ -515,8 +517,8 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     public ResponseEntity legacyGetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
-                                          @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                          @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+                                                @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
         return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
     }
 
@@ -565,9 +567,9 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
     public ResponseEntity legacyValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
-                                              @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                              @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
-                                              @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+                                                    @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                    @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                                    @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
         return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
     }
 
@@ -683,6 +685,16 @@ public class CoreInterfaceController {
      */
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    private String decodeUrlParameters(String s) {
+        String result = "";
+        try {
+            result = URLDecoder.decode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error in decoding: " + e.getMessage(), e);
+        }
+        return result;
     }
 
 
