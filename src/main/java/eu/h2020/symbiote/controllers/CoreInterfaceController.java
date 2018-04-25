@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -160,10 +162,10 @@ public class CoreInterfaceController {
             queryRequest.setShould_rank(should_rank);
             queryRequest.setSecurityRequest(securityRequest);
             if (observed_property != null) {
-                queryRequest.setObserved_property(Arrays.asList(observed_property));
+                queryRequest.setObserved_property(Arrays.asList(observed_property).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
             }
             if (observed_property_iri != null) {
-                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s -> s.replaceAll("%23", "#")).collect(Collectors.toList()));
+                queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
             }
 
             QueryResponse resources = this.rabbitManager.sendSearchRequest(queryRequest);
@@ -684,6 +686,16 @@ public class CoreInterfaceController {
      */
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    private String decodeUrlParameters(String s) {
+        String result = "";
+        try {
+            result = URLDecoder.decode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error in decoding: " + e.getMessage(), e);
+        }
+        return result;
     }
 
 
