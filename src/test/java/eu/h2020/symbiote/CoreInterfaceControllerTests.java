@@ -64,7 +64,7 @@ public class CoreInterfaceControllerTests {
 
         ResponseEntity response = controller.query(null, null, null, null, null, null, null, null, null, null, null, null, null, null, headers);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT, response.getStatusCode());
     }
 
     @Test
@@ -214,7 +214,7 @@ public class CoreInterfaceControllerTests {
 
         ResponseEntity response = controller.getResourceUrls(new String[]{"123"}, headers);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT, response.getStatusCode());
     }
 
     @Test
@@ -283,7 +283,7 @@ public class CoreInterfaceControllerTests {
 
         ResponseEntity response = controller.sparqlQuery(new SparqlQueryRequest(), headers);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT, response.getStatusCode());
     }
 
     @Test
