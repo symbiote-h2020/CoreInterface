@@ -56,6 +56,9 @@ public class CoreInterfaceController {
     @Value("${symbiote.aamUrl}")
     private String aamUrl;
 
+    @Value("${symbiote.admUrl}")
+    private String admUrl;
+
     /**
      * Class constructor which autowires RabbitManager bean.
      *
@@ -606,6 +609,32 @@ public class CoreInterfaceController {
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_VALIDATE_CREDENTIALS, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * TODO documentation
+     */
+    @ApiOperation(value = "TODO",
+            notes = "TODO"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION)
+    public ResponseEntity handleFailFederationAuthorizationReport(@ApiParam(value = "Failed federation authorization report", required = true) @RequestBody FailedFederationAuthorizationReport failedFederationAuthorizationReport) {
+        log.debug("Handle fail federation authorization report");
+        try {
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.admUrl + SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION, failedFederationAuthorizationReport, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
