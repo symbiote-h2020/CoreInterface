@@ -621,10 +621,14 @@ public class CoreInterfaceController {
     }
 
     /**
-     * TODO documentation
+     * Endpoint for reporting failed federation authorization
+     *
+     * @param failedFederationAuthorizationReport failed federation authorization report
+     * @return operation result
      */
     @ApiOperation(value = "TODO",
-            notes = "TODO"
+            notes = "TODO",
+            response = String.class
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
