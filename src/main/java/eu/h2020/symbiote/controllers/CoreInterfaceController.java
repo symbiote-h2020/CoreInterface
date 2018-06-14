@@ -676,7 +676,7 @@ public class CoreInterfaceController {
         try {
             HttpEntity<Credentials> entity = new HttpEntity<>(credentials, null);
 
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.ADM_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_USER_DETAILS, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
