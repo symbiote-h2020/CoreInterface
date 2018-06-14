@@ -670,13 +670,13 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = UserDetails.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_USER_DETAILS)
+            value = SecurityConstants.ADM_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
     public ResponseEntity getUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
         log.debug("Get user details");
         try {
             HttpEntity<Credentials> entity = new HttpEntity<>(credentials, null);
 
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_USER_DETAILS, entity, String.class);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.ADM_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
