@@ -19,10 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -677,6 +675,78 @@ public class CoreInterfaceController {
             HttpEntity<Credentials> entity = new HttpEntity<>(credentials, null);
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_USER_DETAILS, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * TODO
+     */
+    @ApiOperation(value = "TODO",
+            notes = "TODO",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.GET,
+            value = SecurityConstants.ADM_PREFIX + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/bySearchOriginPlatform")
+    public ResponseEntity getMisdeedsGroupedByPlatform(@ApiParam(value = "Headers", required = true) @RequestHeader HttpHeaders httpHeaders,
+                                                       @ApiParam(value = "Platform ID") @RequestParam(name = "platformId", required = false) String platformIdFilter,
+                                                       @ApiParam(value = "Search origin platform ID") @RequestParam(name = "searchOriginPlatformId", required = false) String singleSearchOriginPlatformFilter) {
+        log.debug("Get misdeeds group by platform");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            Map<String,String> params = new HashMap<>();
+            if (platformIdFilter != null)
+                params.put("platformId",platformIdFilter);
+            if (singleSearchOriginPlatformFilter != null)
+                params.put("searchOriginPlatformId",singleSearchOriginPlatformFilter);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.admUrl + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/bySearchOriginPlatform", HttpMethod.GET, entity, String.class, params);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * TODO
+     */
+    @ApiOperation(value = "TODO",
+            notes = "TODO",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.GET,
+            value = SecurityConstants.ADM_PREFIX + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/byFederation")
+    public ResponseEntity getMisdeedsGroupedByFederation(@ApiParam(value = "Headers", required = true) @RequestHeader HttpHeaders httpHeaders,
+                                                         @ApiParam(value = "Platform ID") @RequestParam(name = "platformId", required = false) String platformIdFilter,
+                                                         @ApiParam(value = "Federation ID") @RequestParam(name = "federationId", required = false) String federationIdFilter) {
+        log.debug("Get misdeeds group by federation");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+            Map<String,String> params = new HashMap<>();
+            if (platformIdFilter != null)
+                params.put("platformId",platformIdFilter);
+            if (federationIdFilter != null)
+                params.put("federationId",federationIdFilter);
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.admUrl + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/byFederation", HttpMethod.GET, entity, String.class, params);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
