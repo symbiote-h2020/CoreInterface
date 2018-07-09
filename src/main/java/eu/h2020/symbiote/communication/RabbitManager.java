@@ -8,6 +8,7 @@ import eu.h2020.symbiote.core.internal.CoreQueryRequest;
 import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsResponse;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -129,7 +130,7 @@ public class RabbitManager {
      * but before using RabbitManager to send any message.
      */
     public void initCommunication() {
-        log.info("RabbitMQ communication init");
+        log.info("RabbitMQ communication init for " + this.rabbitUsername + "@"+ this.rabbitHost);
         try {
             ConnectionFactory factory = new ConnectionFactory();
 
@@ -215,7 +216,7 @@ public class RabbitManager {
 
             this.channel.basicPublish(exchangeName, routingKey, props, message.getBytes());
             while (true) {
-                QueueingConsumer.Delivery delivery = consumer.nextDelivery(40000);
+                QueueingConsumer.Delivery delivery = consumer.nextDelivery(60000);
                 if (delivery == null) {
                     log.info("Timeout in response retrieval");
                     return null;
@@ -229,7 +230,7 @@ public class RabbitManager {
                 }
             }
 
-            log.info("Response received: " + responseMsg);
+            log.info("Response received: " + StringUtils.substring(responseMsg,0,400) + " ... ");
             return responseMsg;
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
