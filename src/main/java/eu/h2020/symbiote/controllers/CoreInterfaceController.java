@@ -144,6 +144,7 @@ public class CoreInterfaceController {
                                 @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
 
         try {
+            long in = System.currentTimeMillis();
             if (httpHeaders == null)
                 throw new InvalidArgumentsException();
             SecurityRequest securityRequest = new SecurityRequest(httpHeaders.toSingleValueMap());
@@ -174,6 +175,7 @@ public class CoreInterfaceController {
                 return new ResponseEntity<>(new QueryResponse(HttpStatus.GATEWAY_TIMEOUT.value(), ERROR_GATEWAY_TIMEOUT, null), getServiceResponseHeaders(resources), HttpStatus.GATEWAY_TIMEOUT);
             }
 
+            log.debug( "Returning search query in total "  + ( System.currentTimeMillis() - in) + " ms.");
             return new ResponseEntity<>(resources, getServiceResponseHeaders(resources), HttpStatus.valueOf(resources.getStatus()));
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
