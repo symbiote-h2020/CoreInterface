@@ -81,21 +81,30 @@ public class CoreInterfaceController {
     @Deprecated
     @RequestMapping(method = RequestMethod.GET,
             value = LEGACY_URI_PREFIX + "/query")
-    public ResponseEntity legacyQuery(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platformId,
-                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platformName,
+    public ResponseEntity legacyQuery(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platform_id,
+                                      @ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platformId", required = false) String platformId,
+                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platform_name,
+                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platformName", required = false) String platformName,
                                       @ApiParam(value = "owner of a platform that resource belongs to") @RequestParam(value = "owner", required = false) String owner,
                                       @ApiParam(value = "name of a resource") @RequestParam(value = "name", required = false) String name,
                                       @ApiParam(value = "ID of a resource") @RequestParam(value = "id", required = false) String id,
                                       @ApiParam(value = "description of a resource") @RequestParam(value = "description", required = false) String description,
                                       @ApiParam(value = "name of resource's location") @RequestParam(value = "location_name", required = false) String location_name,
+                                      @ApiParam(value = "name of resource's location") @RequestParam(value = "locationName", required = false) String locationName,
                                       @ApiParam(value = "latitude of resource's location") @RequestParam(value = "location_lat", required = false) Double location_lat,
+                                      @ApiParam(value = "latitude of resource's location") @RequestParam(value = "locationLatitude", required = false) Double locationLatitude,
                                       @ApiParam(value = "longitude of resource's location") @RequestParam(value = "location_long", required = false) Double location_long,
+                                      @ApiParam(value = "longitude of resource's location") @RequestParam(value = "locationLongitude", required = false) Double locationLongitude,
                                       @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
+                                      @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "maxDistance", required = false) Integer maxDistance,
                                       @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                      @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observedProperty", required = false) String[] observedProperty,
                                       @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
+                                      @ApiParam(value = "type of a resource") @RequestParam(value = "resourceType", required = false) String resourceType,
                                       @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
+                                      @ApiParam(value = "whether results should be ranked") @RequestParam(value = "shouldRank", required = false) Boolean shouldRank,
                                       @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
-        return query(platformId, platformName, owner, name, id, description, location_name, location_lat, location_long, max_distance, observed_property, null, resource_type, should_rank, httpHeaders);
+        return query(platform_id, platformId, platform_name, platformName, owner, name, id, description, location_name, locationName, location_lat, locationLatitude, location_long, locationLongitude, max_distance, maxDistance, observed_property, observedProperty, null, null, resource_type, resourceType, should_rank, shouldRank, httpHeaders);
     }
 
     /**
@@ -127,20 +136,30 @@ public class CoreInterfaceController {
             response = QueryResponse.class)
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "Query execution error on server side")})
-    public ResponseEntity query(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platformId,
-                                @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platformName,
+    public ResponseEntity query(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platform_id,
+                                @ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platformId", required = false) String platformId,
+                                @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platform_name,
+                                @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platformName", required = false) String platformName,
                                 @ApiParam(value = "owner of a platform that resource belongs to") @RequestParam(value = "owner", required = false) String owner,
                                 @ApiParam(value = "name of a resource") @RequestParam(value = "name", required = false) String name,
                                 @ApiParam(value = "ID of a resource") @RequestParam(value = "id", required = false) String id,
                                 @ApiParam(value = "description of a resource") @RequestParam(value = "description", required = false) String description,
                                 @ApiParam(value = "name of resource's location") @RequestParam(value = "location_name", required = false) String location_name,
+                                @ApiParam(value = "name of resource's location") @RequestParam(value = "locationName", required = false) String locationName,
                                 @ApiParam(value = "latitude of resource's location") @RequestParam(value = "location_lat", required = false) Double location_lat,
+                                @ApiParam(value = "latitude of resource's location") @RequestParam(value = "locationLatitude", required = false) Double locationLatitude,
                                 @ApiParam(value = "longitude of resource's location") @RequestParam(value = "location_long", required = false) Double location_long,
+                                @ApiParam(value = "longitude of resource's location") @RequestParam(value = "locationLongitude", required = false) Double locationLongitude,
                                 @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
+                                @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "maxDistance", required = false) Integer maxDistance,
                                 @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observedProperty", required = false) String[] observedProperty,
                                 @ApiParam(value = "recource's observed property by using full IRI; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property_iri", required = false) String[] observed_property_iri,
+                                @ApiParam(value = "recource's observed property by using full IRI; can be passed multiple times (acts as AND)") @RequestParam(value = "observedPropertyIri", required = false) String[] observedPropertyIri,
                                 @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
+                                @ApiParam(value = "type of a resource") @RequestParam(value = "resourceType", required = false) String resourceType,
                                 @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
+                                @ApiParam(value = "whether results should be ranked") @RequestParam(value = "shouldRank", required = false) Boolean shouldRank,
                                 @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
 
         try {
@@ -149,23 +168,30 @@ public class CoreInterfaceController {
             SecurityRequest securityRequest = new SecurityRequest(httpHeaders.toSingleValueMap());
 
             CoreQueryRequest queryRequest = new CoreQueryRequest();
-            queryRequest.setPlatform_id(platformId);
-            queryRequest.setPlatform_name(platformName);
+            queryRequest.setPlatform_id(platformId != null ? platformId : platform_id);
+            queryRequest.setPlatform_name(platformName != null ? platformName : platform_name);
             queryRequest.setOwner(owner);
             queryRequest.setName(name);
             queryRequest.setId(id);
             queryRequest.setDescription(description);
-            queryRequest.setLocation_name(location_name);
-            queryRequest.setLocation_lat(location_lat);
-            queryRequest.setLocation_long(location_long);
-            queryRequest.setMax_distance(max_distance);
-            queryRequest.setResource_type(resource_type);
-            queryRequest.setShould_rank(should_rank);
+            queryRequest.setLocation_name(locationName != null ? locationName : location_name);
+            queryRequest.setLocation_lat(locationLatitude != null ? locationLatitude : location_lat);
+            queryRequest.setLocation_long(locationLongitude != null ? locationLongitude : location_long);
+            queryRequest.setMax_distance(maxDistance != null ? maxDistance : max_distance);
+            queryRequest.setResource_type(resourceType != null ? resourceType : resource_type);
+            queryRequest.setShould_rank(shouldRank != null ? shouldRank : should_rank);
             queryRequest.setSecurityRequest(securityRequest);
-            if (observed_property != null) {
+
+            if (observedProperty != null) {
+                queryRequest.setObserved_property(Arrays.asList(observedProperty).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
+            } else if (observed_property != null) {
                 queryRequest.setObserved_property(Arrays.asList(observed_property).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
             }
-            if (observed_property_iri != null) {
+
+
+            if (observedPropertyIri != null) {
+                queryRequest.setObserved_property_iri(Arrays.asList(observedPropertyIri).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
+            } else if (observedPropertyIri != null) {
                 queryRequest.setObserved_property_iri(Arrays.asList(observed_property_iri).stream().map(s -> decodeUrlParameters(s)).collect(Collectors.toList()));
             }
 
