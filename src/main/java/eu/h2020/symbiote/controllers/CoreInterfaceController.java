@@ -485,6 +485,7 @@ public class CoreInterfaceController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
+    @CrossOrigin(exposedHeaders = {"x-auth-token"})
     @RequestMapping(method = RequestMethod.POST,
             value = SecurityConstants.AAM_GET_GUEST_TOKEN)
     public ResponseEntity getGuestToken() {
