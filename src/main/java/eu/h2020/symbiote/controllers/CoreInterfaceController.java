@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 @Api(tags = "Core Interface Controller", description = "Operations of Core Interface Controller")
 public class CoreInterfaceController {
     private static final String LEGACY_URI_PREFIX = "/coreInterface/v1";
+    private static final String AAM_PREFIX = "/aam";
     private static final String ERROR_PROXY_STATUS_MSG = "Error status code in proxy communication: ";
     private static final String ERROR_GATEWAY_TIMEOUT = "Timeout occured when contacting symbIoTe Core services";
 
@@ -321,6 +322,13 @@ public class CoreInterfaceController {
         return getAvailableAAMs();
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.GET,
+            value = SecurityConstants.AAM_GET_AVAILABLE_AAMS)
+    public ResponseEntity legacy2GetAvailableAAMs() {
+        return getAvailableAAMs();
+    }
+
     /**
      * Endpoint for listing available AAM instances.
      *
@@ -333,7 +341,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = AvailableAAMsCollection.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
-            value = SecurityConstants.AAM_GET_AVAILABLE_AAMS)
+            value = AAM_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
     public ResponseEntity getAvailableAAMs() {
         log.debug("Get Available AAMS request");
         try {
@@ -357,6 +365,14 @@ public class CoreInterfaceController {
         return getComponentCertificate(componentIdentifier, platformIdentifier);
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.GET,
+            value = SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+    public ResponseEntity legacy2GetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
+                                                        @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
+        return getComponentCertificate(componentIdentifier, platformIdentifier);
+    }
+
     /**
      * Endpoint for getting component certificate.
      *
@@ -371,7 +387,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.GET,
-            value = SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+            value = AAM_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
     public ResponseEntity getComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
                                                   @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
         log.debug("Get component certificate request");
@@ -395,6 +411,13 @@ public class CoreInterfaceController {
         return signCertificateRequest(certificateRequest);
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+    public ResponseEntity legacy2SignCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
+        return signCertificateRequest(certificateRequest);
+    }
+
     /**
      * Endpoint for getting client certificate
      *
@@ -409,7 +432,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+            value = AAM_PREFIX + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
     public ResponseEntity signCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
         log.debug("Get client certificate");
         try {
@@ -434,6 +457,13 @@ public class CoreInterfaceController {
         return revokeCredentials(revocationRequest);
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.AAM_REVOKE_CREDENTIALS)
+    public ResponseEntity legacy2RevokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
+        return revokeCredentials(revocationRequest);
+    }
+
     /**
      * Endpoint for revoking token
      *
@@ -448,7 +478,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_REVOKE_CREDENTIALS)
+            value = AAM_PREFIX + SecurityConstants.AAM_REVOKE_CREDENTIALS)
     public ResponseEntity revokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
         log.debug("Revoke token");
         try {
@@ -473,6 +503,13 @@ public class CoreInterfaceController {
         return getGuestToken();
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.AAM_GET_GUEST_TOKEN)
+    public ResponseEntity legacy2GetGuestToken() {
+        return getGuestToken();
+    }
+
     /**
      * Endpoint for getting guest token
      *
@@ -487,7 +524,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 500, message = "Error on server side")})
     @CrossOrigin(exposedHeaders = {"x-auth-token"})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_GUEST_TOKEN)
+            value = AAM_PREFIX + SecurityConstants.AAM_GET_GUEST_TOKEN)
     public ResponseEntity getGuestToken() {
         log.debug("Get guest token");
         try {
@@ -510,6 +547,13 @@ public class CoreInterfaceController {
         return getHomeToken(loginRequest);
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.AAM_GET_HOME_TOKEN)
+    public ResponseEntity legacy2GetHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
+        return getHomeToken(loginRequest);
+    }
+
     /**
      * Endpoint for getting home token
      *
@@ -524,7 +568,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_HOME_TOKEN)
+            value = AAM_PREFIX + SecurityConstants.AAM_GET_HOME_TOKEN)
     public ResponseEntity getHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
         log.debug("Get home token");
         try {
@@ -553,6 +597,15 @@ public class CoreInterfaceController {
         return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+    public ResponseEntity legacy2GetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
+                                                @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+        return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
+    }
+
 
     /**
      * Endpoint for getting foreign token
@@ -570,7 +623,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+            value = AAM_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     public ResponseEntity getForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
                                           @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
                                           @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
@@ -604,6 +657,16 @@ public class CoreInterfaceController {
         return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
     }
 
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.AAM_VALIDATE_CREDENTIALS)
+    public ResponseEntity legacy2ValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
+                                                    @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                    @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                                    @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+        return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
+    }
+
     /**
      * Endpoint for validating tokens and certificates
      *
@@ -621,7 +684,7 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = ValidationStatus.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_VALIDATE_CREDENTIALS)
+            value = AAM_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
     public ResponseEntity validateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
                                               @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
                                               @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
@@ -647,40 +710,17 @@ public class CoreInterfaceController {
         }
     }
 
-    /**
-     * Endpoint for reporting failed federation authorization
-     *
-     * @param failedFederationAuthorizationReport failed federation authorization report
-     * @return operation result
-     */
-    @ApiOperation(value = "TODO",
-            notes = "TODO",
-            response = String.class
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 500, message = "Error on server side")})
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION)
-    public ResponseEntity handleFailFederationAuthorizationReport(@ApiParam(value = "Failed federation authorization report", required = true) @RequestBody FailedFederationAuthorizationReport failedFederationAuthorizationReport) {
-        log.debug("Handle fail federation authorization report");
-        try {
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.admUrl + SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION, failedFederationAuthorizationReport, String.class);
-
-            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
-
-            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
-        } catch (HttpStatusCodeException e) {
-            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
-            log.debug(e);
-            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-        }
-    }
-
     @Deprecated
     @RequestMapping(method = RequestMethod.POST,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
     public ResponseEntity legacyGetUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
+        return getUserDetails(credentials);
+    }
+
+    @Deprecated
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.AAM_GET_USER_DETAILS)
+    public ResponseEntity legacy2GetUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
         return getUserDetails(credentials);
     }
 
@@ -697,13 +737,43 @@ public class CoreInterfaceController {
             @ApiResponse(code = 200, message = "OK", response = UserDetails.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.ADM_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
+            value = AAM_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
     public ResponseEntity getUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
         log.debug("Get user details");
         try {
             HttpEntity<Credentials> entity = new HttpEntity<>(credentials, null);
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_USER_DETAILS, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /**
+     * Endpoint for reporting failed federation authorization
+     *
+     * @param failedFederationAuthorizationReport failed federation authorization report
+     * @return operation result
+     */
+    @ApiOperation(value = "TODO",
+            notes = "TODO",
+            response = String.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 500, message = "Error on server side")})
+    @RequestMapping(method = RequestMethod.POST,
+            value = SecurityConstants.ADM_PREFIX + SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION)
+    public ResponseEntity handleFailFederationAuthorizationReport(@ApiParam(value = "Failed federation authorization report", required = true) @RequestBody FailedFederationAuthorizationReport failedFederationAuthorizationReport) {
+        log.debug("Handle fail federation authorization report");
+        try {
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.admUrl + SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION, failedFederationAuthorizationReport, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
