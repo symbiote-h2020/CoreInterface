@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 public class CoreInterfaceController {
     private static final String LEGACY_URI_PREFIX = "/coreInterface/v1";
     private static final String AAM_PREFIX = "/aam";
+    private static final String BTM_PREFIX = "/btm";
     private static final String ERROR_PROXY_STATUS_MSG = "Error status code in proxy communication: ";
     private static final String ERROR_GATEWAY_TIMEOUT = "Timeout occured when contacting symbIoTe Core services";
 
@@ -57,6 +58,9 @@ public class CoreInterfaceController {
 
     @Value("${symbiote.admUrl}")
     private String admUrl;
+
+    @Value("${symbiote.btmUrl}")
+    private String btmUrl;
 
     /**
      * Class constructor which autowires RabbitManager bean.
@@ -78,6 +82,10 @@ public class CoreInterfaceController {
 
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatus()));
     }
+
+    /* -------------------------------------------- */
+    /*                   SEARCH                     */
+    /* -------------------------------------------- */
 
     @Deprecated
     @RequestMapping(method = RequestMethod.GET,
@@ -202,7 +210,7 @@ public class CoreInterfaceController {
                 return new ResponseEntity<>(new QueryResponse(HttpStatus.GATEWAY_TIMEOUT.value(), ERROR_GATEWAY_TIMEOUT, null), getServiceResponseHeaders(resources), HttpStatus.GATEWAY_TIMEOUT);
             }
 
-            log.debug( "Returning search query in total "  + ( System.currentTimeMillis() - in) + " ms.");
+            log.debug("Returning search query in total " + (System.currentTimeMillis() - in) + " ms.");
             return new ResponseEntity<>(resources, getServiceResponseHeaders(resources), HttpStatus.valueOf(resources.getStatus()));
         } catch (InvalidArgumentsException e) {
             return handleBadSecurityHeaders(e);
@@ -255,6 +263,11 @@ public class CoreInterfaceController {
             return handleBadSecurityHeaders(e);
         }
     }
+
+
+    /* -------------------------------------------- */
+    /*        CORE RESOURCE ACCESS MONITOR          */
+    /* -------------------------------------------- */
 
     @Deprecated
     @RequestMapping(method = RequestMethod.GET,
@@ -315,6 +328,10 @@ public class CoreInterfaceController {
         return headers;
     }
 
+    /* -------------------------------------------- */
+    /*    AUTHENTICATION AUTHORIZATION MANAGER      */
+    /* -------------------------------------------- */
+
     @Deprecated
     @RequestMapping(method = RequestMethod.GET,
             value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
@@ -369,7 +386,7 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.GET,
             value = SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
     public ResponseEntity legacy2GetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
-                                                        @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
+                                                         @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
         return getComponentCertificate(componentIdentifier, platformIdentifier);
     }
 
@@ -601,8 +618,8 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     public ResponseEntity legacy2GetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
-                                                @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                                @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+                                                 @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                 @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
         return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
     }
 
@@ -661,9 +678,9 @@ public class CoreInterfaceController {
     @RequestMapping(method = RequestMethod.POST,
             value = SecurityConstants.AAM_VALIDATE_CREDENTIALS)
     public ResponseEntity legacy2ValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
-                                                    @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                                    @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
-                                                    @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+                                                     @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                                     @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                                     @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
         return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
     }
 
@@ -755,6 +772,10 @@ public class CoreInterfaceController {
         }
     }
 
+    /* -------------------------------------------- */
+    /*          ANOMALY DETECTION MODULE            */
+    /* -------------------------------------------- */
+
     /**
      * Endpoint for reporting failed federation authorization
      *
@@ -804,11 +825,11 @@ public class CoreInterfaceController {
         try {
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
 
-            Map<String,String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>();
             if (platformIdFilter != null)
-                params.put("platformId",platformIdFilter);
+                params.put("platformId", platformIdFilter);
             if (singleSearchOriginPlatformFilter != null)
-                params.put("searchOriginPlatformId",singleSearchOriginPlatformFilter);
+                params.put("searchOriginPlatformId", singleSearchOriginPlatformFilter);
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.admUrl + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/bySearchOriginPlatform", HttpMethod.GET, entity, String.class, params);
 
@@ -840,12 +861,113 @@ public class CoreInterfaceController {
         log.debug("Get misdeeds group by federation");
         try {
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
-            Map<String,String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>();
             if (platformIdFilter != null)
-                params.put("platformId",platformIdFilter);
+                params.put("platformId", platformIdFilter);
             if (federationIdFilter != null)
-                params.put("federationId",federationIdFilter);
+                params.put("federationId", federationIdFilter);
             ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.admUrl + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/byFederation", HttpMethod.GET, entity, String.class, params);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    /* -------------------------------------------- */
+    /*        BARTERING AND TRADING MANAGER         */
+    /* -------------------------------------------- */
+    @RequestMapping(method = RequestMethod.POST,
+            value = BTM_PREFIX + SecurityConstants.BTM_REGISTER_COUPON)
+    public ResponseEntity registerCoupon(@RequestHeader HttpHeaders httpHeaders,
+                                         @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
+        log.debug("Register coupon");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + SecurityConstants.BTM_REGISTER_COUPON, HttpMethod.POST, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST,
+            value = BTM_PREFIX + SecurityConstants.BTM_IS_COUPON_VALID)
+    public ResponseEntity isCouponValid(@RequestHeader HttpHeaders httpHeaders,
+                                         @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
+        log.debug("Is coupon valid");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + SecurityConstants.BTM_IS_COUPON_VALID, HttpMethod.POST, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST,
+            value = BTM_PREFIX + SecurityConstants.BTM_CONSUME_COUPON)
+    public ResponseEntity consumeCoupon(@RequestHeader HttpHeaders httpHeaders,
+                                         @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
+        log.debug("Consume coupon");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + SecurityConstants.BTM_CONSUME_COUPON, HttpMethod.POST, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST,
+            value = BTM_PREFIX + SecurityConstants.BTM_CLEANUP_COUPONS)
+    public ResponseEntity cleanupConsumedCoupons(@RequestBody String timestamp) {
+        log.debug("Cleanup consumed coupons");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(timestamp, null);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + SecurityConstants.BTM_CLEANUP_COUPONS, HttpMethod.POST, entity, String.class);
+
+            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+
+            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+        } catch (HttpStatusCodeException e) {
+            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+            log.debug(e);
+            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST,
+            value = BTM_PREFIX + "/couponusage")
+    public ResponseEntity couponUsage(@RequestBody String filter) {
+        log.debug("Cleanup consumed coupons");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(filter, null);
+
+            ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + "/couponusage", HttpMethod.POST, entity, String.class);
 
             HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
 
