@@ -17,11 +17,10 @@ import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.communication.payloads.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -694,5 +693,386 @@ public class CoreInterfaceControllerTests {
 
     }
 
+    @Test
+    public void testHandleFailFederationAuthorizationReport_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        FailedFederationAuthorizationReport failedFederationAuthorizationReport = new FailedFederationAuthorizationReport(null, null, null, null, null);
+
+        ResponseEntity response = new ResponseEntity(new String(), HttpStatus.OK);
+
+        when(restTemplate.postForEntity(anyString(), anyString(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.handleFailFederationAuthorizationReport(failedFederationAuthorizationReport);
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody() instanceof String);
+    }
+
+    @Test
+    public void testHandleFailFederationAuthorizationReport_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        FailedFederationAuthorizationReport failedFederationAuthorizationReport = new FailedFederationAuthorizationReport(null, null, null, null, null);
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.postForEntity(anyString(), anyString(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.handleFailFederationAuthorizationReport(failedFederationAuthorizationReport);
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testGetMisdeedsGroupedByPlatform_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        ResponseEntity response = new ResponseEntity("Misdeeds grouped by platform", HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), Matchers.<HttpEntity<String>>any(), eq(String.class), Matchers.<Map<String,?>>any())).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getMisdeedsGroupedByPlatform(headers, "platformId", "searchOrigin");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody() instanceof String);
+        assertEquals(28, ((String) result.getBody()).length());
+    }
+
+    @Test
+    public void testGetMisdeedsGroupedByPlatform_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), Matchers.<HttpEntity<String>>any(), eq(String.class), Matchers.<Map<String,?>>any())).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getMisdeedsGroupedByPlatform(headers, "platformId", "searchOrigin");
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testGetMisdeedsGroupedByFederation_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        ResponseEntity response = new ResponseEntity("Misdeeds grouped by platform", HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), Matchers.<HttpEntity<String>>any(), eq(String.class), Matchers.<Map<String,?>>any())).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getMisdeedsGroupedByFederation(headers, "platformId", "searchOrigin");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody() instanceof String);
+        assertEquals(28, ((String) result.getBody()).length());
+    }
+
+    @Test
+    public void testGetMisdeedsGroupedByFederation_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), Matchers.<HttpEntity<String>>any(), eq(String.class), Matchers.<Map<String,?>>any())).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.getMisdeedsGroupedByFederation(headers, "platformId", "searchOrigin");
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testRegisterCoupon_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        ResponseEntity response = new ResponseEntity("", HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.registerCoupon(headers, "coupon");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testRegisterCoupon_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.registerCoupon(headers, "coupon");
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testIsCouponValid_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        ResponseEntity response = new ResponseEntity("", HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.isCouponValid(headers, "coupon");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testIsCouponValid_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.isCouponValid(headers, "coupon");
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testConsumeCoupon_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        ResponseEntity response = new ResponseEntity("", HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.consumeCoupon(headers, "coupon");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testConsumeCoupon_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER, "1500000000");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER, "1");
+        headers.add(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "1", "{\"token\":\"token\"," +
+                "\"authenticationChallenge\":\"authenticationChallenge\"," +
+                "\"clientCertificate\":\"clientCertificate\"," +
+                "\"clientCertificateSigningAAMCertificate\":\"clientCertificateSigningAAMCertificate\"," +
+                "\"foreignTokenIssuingAAMCertificate\":\"foreignTokenIssuingAAMCertificate\"}");
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.consumeCoupon(headers, "coupon");
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testCleanupCoupons_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        ResponseEntity response = new ResponseEntity("", HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.cleanupConsumedCoupons("123");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testCleanupCoupons_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.cleanupConsumedCoupons("123");
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testCouponUsage_ok() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        ResponseEntity response = new ResponseEntity("", HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenReturn(response);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.couponUsage("filter");
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+
+    }
+
+    @Test
+    public void testCouponUsage_internalServer() {
+        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+
+        HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), Matchers.<HttpEntity<String>>any(), eq(String.class))).thenThrow(exception);
+
+        CoreInterfaceController controller = new CoreInterfaceController(null);
+        controller.setRestTemplate(restTemplate);
+
+        ResponseEntity result = controller.couponUsage("filter");
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+
+    }
 }
 

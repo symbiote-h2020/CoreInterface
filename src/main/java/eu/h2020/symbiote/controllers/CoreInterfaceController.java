@@ -11,6 +11,7 @@ import eu.h2020.symbiote.core.internal.CoreSparqlQueryRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsRequest;
 import eu.h2020.symbiote.core.internal.cram.ResourceUrlsResponse;
 import eu.h2020.symbiote.security.commons.SecurityConstants;
+import eu.h2020.symbiote.security.commons.enums.ManagementStatus;
 import eu.h2020.symbiote.security.commons.enums.ValidationStatus;
 import eu.h2020.symbiote.security.commons.exceptions.custom.InvalidArgumentsException;
 import eu.h2020.symbiote.security.communication.payloads.*;
@@ -349,14 +350,12 @@ public class CoreInterfaceController {
     /**
      * Endpoint for listing available AAM instances.
      *
-     * @return list of available AAM instances
+     * @return collection of AAMs available in the SymbIoTe ecosystem
      */
-    @ApiOperation(value = "Get available AAMs",
-            notes = "Get list of available AAM instances"
-    )
+    @ApiOperation(value = "Returns collection of available platforms (their AAMs and components)", response = AvailableAAMsCollection.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = AvailableAAMsCollection.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 500, message = "Internal AAM Error")})
     @RequestMapping(method = RequestMethod.GET,
             value = AAM_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
     public ResponseEntity getAvailableAAMs() {
@@ -393,16 +392,15 @@ public class CoreInterfaceController {
     /**
      * Endpoint for getting component certificate.
      *
-     * @param componentIdentifier component identifier
-     * @param platformIdentifier  platform identifier
-     * @return component certificate
+     * @param componentIdentifier component identifier or {@link SecurityConstants#AAM_COMPONENT_NAME} for AAM CA certificate
+     * @param platformIdentifier  for a platform component or {@link SecurityConstants#CORE_AAM_INSTANCE_ID} for Symbiote core components
+     * @return symbiote component Certificate of the component in PEM format
      */
-    @ApiOperation(value = "Get component certificate",
-            notes = "Get component certificate"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
-            @ApiResponse(code = 500, message = "Error on server side")})
+    @ApiOperation(value = "Get component certificate", response = String.class)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 500, message = "Could not retrieve Component Certificate"),
+            @ApiResponse(code = 404, message = "Certificate could not be found")})
     @RequestMapping(method = RequestMethod.GET,
             value = AAM_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
     public ResponseEntity getComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
@@ -436,22 +434,20 @@ public class CoreInterfaceController {
     }
 
     /**
-     * Endpoint for getting client certificate
+     * Endpoint for signing certificate request
      *
-     * @param certificateRequest certificate request
-     * @return client certificate
+     * @param certificateRequest required to sign a certificate request for given (username, clientId) tupple.
+     * @return the certificate issued using the provided CSR in PEM format
      */
-    @ApiOperation(value = "Get client certificate",
-            notes = "Get client certificate",
-            response = String.class
-    )
+    @ApiOperation(value = "Allows signing certificates' requests")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 403, message = "Client account is not activated or blocked"),
+            @ApiResponse(code = 500, message = "Could not sign the requested certificate")})
     @RequestMapping(method = RequestMethod.POST,
             value = AAM_PREFIX + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
-    public ResponseEntity signCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
-        log.debug("Get client certificate");
+    public ResponseEntity signCertificateRequest(@ApiParam(value = "Request required to sign a certificate for given (username, clientId) tupple", required = true) @RequestBody CertificateRequest certificateRequest) {
+        log.debug("Sign certificate request");
         try {
             HttpEntity<CertificateRequest> entity = new HttpEntity<>(certificateRequest, null);
 
@@ -482,22 +478,21 @@ public class CoreInterfaceController {
     }
 
     /**
-     * Endpoint for revoking token
+     * Exposes a service that allows users to revoke their client certificates and tokens.
      *
-     * @param revocationRequest revocation request
-     * @return status of revocation
+     * @param revocationRequest required to revoke. Depending on it's fields, token or certificate can be revoked.
+     * @return ResponseEntity<String> where as header HTTP status is sent and in body true/false depending on revocation status
      */
-    @ApiOperation(value = "Revoke token",
-            notes = "Revoke token",
-            response = String.class
-    )
+    @ApiOperation(value = "Allows users to revoke their client certificates and tokens")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 400, message = "Request contains invalid arguments"),
+            @ApiResponse(code = 401, message = "Incorrect credentials were provided"),
+            @ApiResponse(code = 403, message = "Client account is not activated or blocked")})
     @RequestMapping(method = RequestMethod.POST,
             value = AAM_PREFIX + SecurityConstants.AAM_REVOKE_CREDENTIALS)
-    public ResponseEntity revokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
-        log.debug("Revoke token");
+    public ResponseEntity revokeCredentials(@ApiParam(name = "Revocation Request", value = "Depending on it's fields, token or certificate can be revoked", required = true) @RequestBody RevocationRequest revocationRequest) {
+        log.debug("Revoke credentials");
         try {
             HttpEntity<RevocationRequest> entity = new HttpEntity<>(revocationRequest, null);
 
@@ -528,17 +523,12 @@ public class CoreInterfaceController {
     }
 
     /**
-     * Endpoint for getting guest token
-     *
-     * @return guest token
+     * @return GUEST token used to access public resources offered in SymbIoTe
      */
-    @ApiOperation(value = "Get guest token",
-            notes = "Get guest token",
-            response = String.class
-    )
+    @ApiOperation(value = "Issues a Guest Token")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 500, message = "Could not create Guest Token")})
     @CrossOrigin(exposedHeaders = {"x-auth-token"})
     @RequestMapping(method = RequestMethod.POST,
             value = AAM_PREFIX + SecurityConstants.AAM_GET_GUEST_TOKEN)
@@ -572,18 +562,17 @@ public class CoreInterfaceController {
     }
 
     /**
-     * Endpoint for getting home token
-     *
-     * @param loginRequest login request
-     * @return home token
+     * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildHomeTokenAcquisitionRequest(HomeCredentials)}
+     *                     and http://www.smarteremc2.eu/colab/display/SYM/Home+Authorization+Token+acquisition+%28home+login%29+request
+     * @return HOME token used to access restricted resources offered in SymbIoTe
      */
-    @ApiOperation(value = "Get home token",
-            notes = "Get home token",
-            response = String.class
-    )
+    @ApiOperation(value = "Issues a Home Token")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 400, message = "Received token was malformed"),
+            @ApiResponse(code = 401, message = "Incorrect Credentials were provided"),
+            @ApiResponse(code = 403, message = "Client account is not activated or blocked"),
+            @ApiResponse(code = 500, message = "Server failed to create Home Token")})
     @RequestMapping(method = RequestMethod.POST,
             value = AAM_PREFIX + SecurityConstants.AAM_GET_HOME_TOKEN)
     public ResponseEntity getHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
@@ -625,20 +614,17 @@ public class CoreInterfaceController {
 
 
     /**
-     * Endpoint for getting foreign token
-     *
-     * @param remoteHomeToken   remote home token
-     * @param clientCertificate client certificate
-     * @param aamCertificate    AAM certificate
-     * @return foreign token
+     * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
+     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
+     * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
      */
-    @ApiOperation(value = "Get foreign token",
-            notes = "Get foreign token",
-            response = String.class
-    )
+    @ApiOperation(value = "Issues a Foreign Token")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 401, message = "Received token could not be validated"),
+            @ApiResponse(code = 403, message = "Received token belonged to a blocked client"),
+            @ApiResponse(code = 500, message = "Server failed to create Foreign Token")})
     @RequestMapping(method = RequestMethod.POST,
             value = AAM_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
     public ResponseEntity getForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
@@ -685,27 +671,22 @@ public class CoreInterfaceController {
     }
 
     /**
-     * Endpoint for validating tokens and certificates
-     *
-     * @param token                                  token
-     * @param clientCertificate                      client certificate
-     * @param clientCertificateSigningAAMCertificate AAM certificate
-     * @param foreignTokenIssuingAAMCertificate      foreign token
+     * @param token                                  that is to be validated
+     * @param clientCertificate                      in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+     * @param clientCertificateSigningAAMCertificate in PEM being the AAM that signed the clientCertificate  in 'offline' (intranet) scenarios
+     * @param foreignTokenIssuingAAMCertificate      in PEM with key matching the IPK claim in the provided FOREIGN token in 'offline' (intranet) scenarios
      * @return validation status
      */
-    @ApiOperation(value = "Validate tokens and certificates",
-            notes = "Validate tokens and certificates",
-            response = ValidationStatus.class
-    )
+    @ApiOperation(value = "Responds with validation status of processed Validation request", response = ValidationStatus.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ValidationStatus.class),
             @ApiResponse(code = 500, message = "Error on server side")})
     @RequestMapping(method = RequestMethod.POST,
             value = AAM_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
-    public ResponseEntity validateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
-                                              @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                              @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
-                                              @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+    public ResponseEntity validateCredentials(@ApiParam(value = "Token to be validated", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
+                                              @ApiParam(value = "used for Offline scenarios") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+                                              @ApiParam(value = "used for Offline scenarios") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+                                              @ApiParam(value = "used for Offline scenarios") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
         log.debug("Validate token/certificate");
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -742,20 +723,16 @@ public class CoreInterfaceController {
     }
 
     /**
-     * Endpoint for getting user details
-     *
-     * @return user details
+     * @param credentials of a user whose details are requested
+     * @return details concerning requested user. These do NOT contain user's password
      */
-    @ApiOperation(value = "Get user details",
-            notes = "Get user details",
-            response = UserDetails.class
-    )
+    @ApiOperation(value = "Performs management action based on management request", response = ManagementStatus.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = UserDetails.class),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 500, message = "Internal User Management Error")})
     @RequestMapping(method = RequestMethod.POST,
             value = AAM_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
-    public ResponseEntity getUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
+    public ResponseEntity getUserDetails(@ApiParam(name = "User Management Request", value = "required to initialize user's management operation", required = true) @RequestBody Credentials credentials) {
         log.debug("Get user details");
         try {
             HttpEntity<Credentials> entity = new HttpEntity<>(credentials, null);
@@ -777,21 +754,21 @@ public class CoreInterfaceController {
     /* -------------------------------------------- */
 
     /**
-     * Endpoint for reporting failed federation authorization
+     * Report failed federation authentication
      *
-     * @param failedFederationAuthorizationReport failed federation authorization report
-     * @return operation result
+     * @param failedFederationAuthorizationReport containing essential information about the anomaly
+     * @return HttpStatus of the operation
      */
-    @ApiOperation(value = "TODO",
-            notes = "TODO",
-            response = String.class
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 500, message = "Error on server side")})
+    @ApiOperation(value = "Handles received reports of failed authorization within the federation", response = HttpStatus.class)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Report was correctly verified and saved."),
+            @ApiResponse(code = 400, message = "Received report is not correctly built."),
+            @ApiResponse(code = 401, message = "Received security request doesn't provide access to reported resource."),
+            @ApiResponse(code = 404, message = "Some of the reported entities are unrecognized."),
+            @ApiResponse(code = 500, message = "Internal Server Error.")})
     @RequestMapping(method = RequestMethod.POST,
             value = SecurityConstants.ADM_PREFIX + SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION)
-    public ResponseEntity handleFailFederationAuthorizationReport(@ApiParam(value = "Failed federation authorization report", required = true) @RequestBody FailedFederationAuthorizationReport failedFederationAuthorizationReport) {
+    public ResponseEntity handleFailFederationAuthorizationReport(@ApiParam(name = "FailedFederationAuthorizationReport", required = true) @RequestBody FailedFederationAuthorizationReport failedFederationAuthorizationReport) {
         log.debug("Handle fail federation authorization report");
         try {
             ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.admUrl + SecurityConstants.ADM_LOG_FAILED_FEDERATION_AUTHORIZATION, failedFederationAuthorizationReport, String.class);
@@ -807,20 +784,24 @@ public class CoreInterfaceController {
     }
 
     /**
-     * TODO
+     * Acquire platform misdeeds reports needed for trust calculation, grouped by search origin platforms
+     *
+     * @param httpHeaders                      security request headers
+     * @param platformIdFilter                 optional platform filter
+     * @param singleSearchOriginPlatformFilter optional search origin platform filter
+     * @return map of platforms misdeeds reports
      */
-    @ApiOperation(value = "TODO",
-            notes = "TODO",
-            response = String.class
-    )
+    @ApiOperation(value = "Returns information about platforms misdeeds, grouped by search origin platforms", response = OriginPlatformGroupedPlatformMisdeedsReport.class, responseContainer = "Map")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 400, message = "Received security request was malformed"),
+            @ApiResponse(code = 401, message = "Unauthorized Entry"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET,
             value = SecurityConstants.ADM_PREFIX + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/bySearchOriginPlatform")
-    public ResponseEntity getMisdeedsGroupedByPlatform(@ApiParam(value = "Headers", required = true) @RequestHeader HttpHeaders httpHeaders,
-                                                       @ApiParam(value = "Platform ID") @RequestParam(name = "platformId", required = false) String platformIdFilter,
-                                                       @ApiParam(value = "Search origin platform ID") @RequestParam(name = "searchOriginPlatformId", required = false) String singleSearchOriginPlatformFilter) {
+    public ResponseEntity getMisdeedsGroupedByPlatform(@ApiParam(value = "Security headers", required = true) @RequestHeader HttpHeaders httpHeaders,
+                                                       @ApiParam(value = "Platform filter") @RequestParam(name = "platformId", required = false) String platformIdFilter,
+                                                       @ApiParam(value = "Search Origin Platform filter") @RequestParam(name = "searchOriginPlatformId", required = false) String singleSearchOriginPlatformFilter) {
         log.debug("Get misdeeds group by platform");
         try {
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
@@ -844,20 +825,24 @@ public class CoreInterfaceController {
     }
 
     /**
-     * TODO
+     * Acquire platform misdeeds reports needed for trust calculation, grouped by federations
+     *
+     * @param httpHeaders        security request headers
+     * @param platformIdFilter   optional platform filter
+     * @param federationIdFilter optional federation filter
+     * @return map of platforms misdeeds reports
      */
-    @ApiOperation(value = "TODO",
-            notes = "TODO",
-            response = String.class
-    )
+    @ApiOperation(value = "Returns information about platforms misdeeds, grouped by federations", response = FederationGroupedPlatformMisdeedsReport.class, responseContainer = "Map")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 500, message = "Error on server side")})
+            @ApiResponse(code = 400, message = "Received security request was malformed"),
+            @ApiResponse(code = 401, message = "Unauthorized Entry"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET,
             value = SecurityConstants.ADM_PREFIX + SecurityConstants.ADM_GET_FEDERATED_MISDEEDS + "/byFederation")
-    public ResponseEntity getMisdeedsGroupedByFederation(@ApiParam(value = "Headers", required = true) @RequestHeader HttpHeaders httpHeaders,
-                                                         @ApiParam(value = "Platform ID") @RequestParam(name = "platformId", required = false) String platformIdFilter,
-                                                         @ApiParam(value = "Federation ID") @RequestParam(name = "federationId", required = false) String federationIdFilter) {
+    public ResponseEntity getMisdeedsGroupedByFederation(@ApiParam(value = "Security headers", required = true) @RequestHeader HttpHeaders httpHeaders,
+                                                         @ApiParam(value = "Platform filter") @RequestParam(name = "platformId", required = false) String platformIdFilter,
+                                                         @ApiParam(value = "Federation filter") @RequestParam(name = "federationId", required = false) String federationIdFilter) {
         log.debug("Get misdeeds group by federation");
         try {
             HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
@@ -881,9 +866,14 @@ public class CoreInterfaceController {
     /* -------------------------------------------- */
     /*        BARTERING AND TRADING MANAGER         */
     /* -------------------------------------------- */
+    @ApiOperation(value = "Register coupon in the Core BTM.")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "Received coupon was malformed"),
+            @ApiResponse(code = 401, message = "Received coupon was not valid"),
+            @ApiResponse(code = 500, message = "Internal server error occurred (DB error, connection error)")})
     @RequestMapping(method = RequestMethod.POST,
             value = BTM_PREFIX + SecurityConstants.BTM_REGISTER_COUPON)
-    public ResponseEntity registerCoupon(@RequestHeader HttpHeaders httpHeaders,
+    public ResponseEntity registerCoupon(@ApiParam(value = "Security headers", required = true) @RequestHeader HttpHeaders httpHeaders,
                                          @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
         log.debug("Register coupon");
         try {
@@ -901,9 +891,12 @@ public class CoreInterfaceController {
         }
     }
 
+    @ApiOperation(value = "CouponEntity validation in Core BTM")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "Received coupon was malformed")})
     @RequestMapping(method = RequestMethod.POST,
             value = BTM_PREFIX + SecurityConstants.BTM_IS_COUPON_VALID)
-    public ResponseEntity isCouponValid(@RequestHeader HttpHeaders httpHeaders,
+    public ResponseEntity isCouponValid(@ApiParam(value = "Security headers", required = true) @RequestHeader HttpHeaders httpHeaders,
                                          @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
         log.debug("Is coupon valid");
         try {
@@ -921,9 +914,12 @@ public class CoreInterfaceController {
         }
     }
 
+    @ApiOperation(value = "Consume coupon in the Core BTM")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "Received coupon didn't pass validation")})
     @RequestMapping(method = RequestMethod.POST,
             value = BTM_PREFIX + SecurityConstants.BTM_CONSUME_COUPON)
-    public ResponseEntity consumeCoupon(@RequestHeader HttpHeaders httpHeaders,
+    public ResponseEntity consumeCoupon(@ApiParam(value = "Security headers", required = true) @RequestHeader HttpHeaders httpHeaders,
                                          @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
         log.debug("Consume coupon");
         try {
@@ -941,6 +937,7 @@ public class CoreInterfaceController {
         }
     }
 
+    @ApiOperation(value = "Cleanup all consumed coupons before provided timestamp")
     @RequestMapping(method = RequestMethod.POST,
             value = BTM_PREFIX + SecurityConstants.BTM_CLEANUP_COUPONS)
     public ResponseEntity cleanupConsumedCoupons(@RequestBody String timestamp) {
@@ -960,10 +957,13 @@ public class CoreInterfaceController {
         }
     }
 
+    @ApiOperation(value = "List used coupons")
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "Received request was malformed")})
     @RequestMapping(method = RequestMethod.POST,
             value = BTM_PREFIX + "/couponusage")
     public ResponseEntity couponUsage(@RequestBody String filter) {
-        log.debug("Cleanup consumed coupons");
+        log.debug("Coupon usage");
         try {
             HttpEntity<String> entity = new HttpEntity<>(filter, null);
 
