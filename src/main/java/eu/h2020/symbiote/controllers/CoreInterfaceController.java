@@ -42,10 +42,11 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin
 @Api(tags = "Core Interface Controller", description = "Operations of Core Interface Controller")
+@RequestMapping("/coreInterface")
 public class CoreInterfaceController {
-    private static final String LEGACY_URI_PREFIX = "/coreInterface/v1";
-    private static final String AAM_PREFIX = "/aam";
-    private static final String BTM_PREFIX = "/btm";
+    private static final String LEGACY_URI_PREFIX = "/v1";
+    private static final String AAM_PREFIX = "";
+    private static final String BTM_PREFIX = "";
     private static final String ERROR_PROXY_STATUS_MSG = "Error status code in proxy communication: ";
     private static final String ERROR_GATEWAY_TIMEOUT = "Timeout occured when contacting symbIoTe Core services";
 
@@ -88,34 +89,34 @@ public class CoreInterfaceController {
     /*                   SEARCH                     */
     /* -------------------------------------------- */
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.GET,
-            value = LEGACY_URI_PREFIX + "/query")
-    public ResponseEntity legacyQuery(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platform_id,
-                                      @ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platformId", required = false) String platformId,
-                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platform_name,
-                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platformName", required = false) String platformName,
-                                      @ApiParam(value = "owner of a platform that resource belongs to") @RequestParam(value = "owner", required = false) String owner,
-                                      @ApiParam(value = "name of a resource") @RequestParam(value = "name", required = false) String name,
-                                      @ApiParam(value = "ID of a resource") @RequestParam(value = "id", required = false) String id,
-                                      @ApiParam(value = "description of a resource") @RequestParam(value = "description", required = false) String description,
-                                      @ApiParam(value = "name of resource's location") @RequestParam(value = "location_name", required = false) String location_name,
-                                      @ApiParam(value = "name of resource's location") @RequestParam(value = "locationName", required = false) String locationName,
-                                      @ApiParam(value = "latitude of resource's location") @RequestParam(value = "location_lat", required = false) Double location_lat,
-                                      @ApiParam(value = "latitude of resource's location") @RequestParam(value = "locationLatitude", required = false) Double locationLatitude,
-                                      @ApiParam(value = "longitude of resource's location") @RequestParam(value = "location_long", required = false) Double location_long,
-                                      @ApiParam(value = "longitude of resource's location") @RequestParam(value = "locationLongitude", required = false) Double locationLongitude,
-                                      @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
-                                      @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "maxDistance", required = false) Integer maxDistance,
-                                      @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
-                                      @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observedProperty", required = false) String[] observedProperty,
-                                      @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
-                                      @ApiParam(value = "type of a resource") @RequestParam(value = "resourceType", required = false) String resourceType,
-                                      @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
-                                      @ApiParam(value = "whether results should be ranked") @RequestParam(value = "shouldRank", required = false) Boolean shouldRank,
-                                      @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
-        return query(platform_id, platformId, platform_name, platformName, owner, name, id, description, location_name, locationName, location_lat, locationLatitude, location_long, locationLongitude, max_distance, maxDistance, observed_property, observedProperty, null, null, resource_type, resourceType, should_rank, shouldRank, httpHeaders);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.GET,
+//            value = LEGACY_URI_PREFIX + "/query")
+//    public ResponseEntity legacyQuery(@ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platform_id", required = false) String platform_id,
+//                                      @ApiParam(value = "ID of a platform that resource belongs to") @RequestParam(value = "platformId", required = false) String platformId,
+//                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platform_name", required = false) String platform_name,
+//                                      @ApiParam(value = "name of a platform that resource belongs to") @RequestParam(value = "platformName", required = false) String platformName,
+//                                      @ApiParam(value = "owner of a platform that resource belongs to") @RequestParam(value = "owner", required = false) String owner,
+//                                      @ApiParam(value = "name of a resource") @RequestParam(value = "name", required = false) String name,
+//                                      @ApiParam(value = "ID of a resource") @RequestParam(value = "id", required = false) String id,
+//                                      @ApiParam(value = "description of a resource") @RequestParam(value = "description", required = false) String description,
+//                                      @ApiParam(value = "name of resource's location") @RequestParam(value = "location_name", required = false) String location_name,
+//                                      @ApiParam(value = "name of resource's location") @RequestParam(value = "locationName", required = false) String locationName,
+//                                      @ApiParam(value = "latitude of resource's location") @RequestParam(value = "location_lat", required = false) Double location_lat,
+//                                      @ApiParam(value = "latitude of resource's location") @RequestParam(value = "locationLatitude", required = false) Double locationLatitude,
+//                                      @ApiParam(value = "longitude of resource's location") @RequestParam(value = "location_long", required = false) Double location_long,
+//                                      @ApiParam(value = "longitude of resource's location") @RequestParam(value = "locationLongitude", required = false) Double locationLongitude,
+//                                      @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
+//                                      @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "maxDistance", required = false) Integer maxDistance,
+//                                      @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+//                                      @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observedProperty", required = false) String[] observedProperty,
+//                                      @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
+//                                      @ApiParam(value = "type of a resource") @RequestParam(value = "resourceType", required = false) String resourceType,
+//                                      @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
+//                                      @ApiParam(value = "whether results should be ranked") @RequestParam(value = "shouldRank", required = false) Boolean shouldRank,
+//                                      @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+//        return query(platform_id, platformId, platform_name, platformName, owner, name, id, description, location_name, locationName, location_lat, locationLatitude, location_long, locationLongitude, max_distance, maxDistance, observed_property, observedProperty, null, null, resource_type, resourceType, should_rank, shouldRank, httpHeaders);
+//    }
 
     /**
      * Endpoint for querying registered resources. Query parameters are passed via GET request params and are all
@@ -162,15 +163,18 @@ public class CoreInterfaceController {
                                 @ApiParam(value = "longitude of resource's location") @RequestParam(value = "locationLongitude", required = false) Double locationLongitude,
                                 @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "max_distance", required = false) Integer max_distance,
                                 @ApiParam(value = "maximum radius from specified latitude and longitude to look for resources") @RequestParam(value = "maxDistance", required = false) Integer maxDistance,
-                                @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
-                                @ApiParam(value = "recource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observedProperty", required = false) String[] observedProperty,
-                                @ApiParam(value = "recource's observed property by using full IRI; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property_iri", required = false) String[] observed_property_iri,
-                                @ApiParam(value = "recource's observed property by using full IRI; can be passed multiple times (acts as AND)") @RequestParam(value = "observedPropertyIri", required = false) String[] observedPropertyIri,
+                                @ApiParam(value = "resource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property", required = false) String[] observed_property,
+                                @ApiParam(value = "resource's observed property; can be passed multiple times (acts as AND)") @RequestParam(value = "observedProperty", required = false) String[] observedProperty,
+                                @ApiParam(value = "resource's observed property by using full IRI; can be passed multiple times (acts as AND)") @RequestParam(value = "observed_property_iri", required = false) String[] observed_property_iri,
+                                @ApiParam(value = "resource's observed property by using full IRI; can be passed multiple times (acts as AND)") @RequestParam(value = "observedPropertyIri", required = false) String[] observedPropertyIri,
                                 @ApiParam(value = "type of a resource") @RequestParam(value = "resource_type", required = false) String resource_type,
                                 @ApiParam(value = "type of a resource") @RequestParam(value = "resourceType", required = false) String resourceType,
                                 @ApiParam(value = "whether results should be ranked") @RequestParam(value = "should_rank", required = false) Boolean should_rank,
                                 @ApiParam(value = "whether results should be ranked") @RequestParam(value = "shouldRank", required = false) Boolean shouldRank,
-                                @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+                                @ApiParam(value = "timestamp of the request", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER) String timestamp,
+                                @ApiParam(value = "securityCredentials set size header", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER) String size,
+                                @ApiParam(value = "each SecurityCredentials entry header, they are numbered 1..size", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "*") String credentials,
+                                @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader("securityHeaders") HttpHeaders httpHeaders) {
 
         try {
             long in = System.currentTimeMillis();
@@ -218,13 +222,13 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + "/sparqlQuery")
-    public ResponseEntity legacySparqlQuery(@ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
-                                            @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
-        return sparqlQuery(sparqlQuery, httpHeaders);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + "/sparqlQuery")
+//    public ResponseEntity legacySparqlQuery(@ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
+//                                            @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+//        return sparqlQuery(sparqlQuery, httpHeaders);
+//    }
 
     /**
      * Endpoint for querying registered resources using SPARQL.
@@ -243,7 +247,10 @@ public class CoreInterfaceController {
             @ApiResponse(code = 500, message = "Query execution error on server side")})
     @RequestMapping(method = RequestMethod.POST,
             value = "/sparqlQuery")
-    public ResponseEntity sparqlQuery(@ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
+    public ResponseEntity sparqlQuery(@ApiParam(value = "timestamp of the request", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER) String timestamp,
+                                      @ApiParam(value = "securityCredentials set size header", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER) String size,
+                                      @ApiParam(value = "each SecurityCredentials entry header, they are numbered 1..size", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "*") String credentials,
+                                      @ApiParam(name = "Sparql query", value = "Sparql query with desired response format") @RequestBody SparqlQueryRequest sparqlQuery,
                                       @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
         try {
             if (httpHeaders == null)
@@ -270,13 +277,13 @@ public class CoreInterfaceController {
     /*        CORE RESOURCE ACCESS MONITOR          */
     /* -------------------------------------------- */
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.GET,
-            value = LEGACY_URI_PREFIX + "/resourceUrls")
-    public ResponseEntity legacyGetResourceUrls(@ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
-                                                @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
-        return getResourceUrls(resourceId, httpHeaders);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.GET,
+//            value = LEGACY_URI_PREFIX + "/resourceUrls")
+//    public ResponseEntity legacyGetResourceUrls(@ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
+//                                                @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
+//        return getResourceUrls(resourceId, httpHeaders);
+//    }
 
     /**
      * Endpoint for querying URL of resources' Interworking Interface.
@@ -299,7 +306,10 @@ public class CoreInterfaceController {
     })
     @RequestMapping(method = RequestMethod.GET,
             value = "/resourceUrls")
-    public ResponseEntity getResourceUrls(@ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
+    public ResponseEntity getResourceUrls(@ApiParam(value = "timestamp of the request", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_TIMESTAMP_HEADER) String timestamp,
+                                          @ApiParam(value = "securityCredentials set size header", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_SIZE_HEADER) String size,
+                                          @ApiParam(value = "each SecurityCredentials entry header, they are numbered 1..size", required = true) @RequestHeader(SecurityConstants.SECURITY_CREDENTIALS_HEADER_PREFIX + "*") String credentials,
+                                          @ApiParam(value = "Resource ID; can be passed multiple times to serve multiple resources at once", required = true) @RequestParam("id") String[] resourceId,
                                           @ApiParam(value = "Headers, containing X-Auth-Timestamp, X-Auth-Size and X-Auth-{1..n} fields", required = true) @RequestHeader HttpHeaders httpHeaders) {
         try {
             if (httpHeaders == null)
@@ -333,19 +343,19 @@ public class CoreInterfaceController {
     /*    AUTHENTICATION AUTHORIZATION MANAGER      */
     /* -------------------------------------------- */
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.GET,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
-    public ResponseEntity legacyGetAvailableAAMs() {
-        return getAvailableAAMs();
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.GET,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_AVAILABLE_AAMS)
+//    public ResponseEntity legacyGetAvailableAAMs() {
+//        return getAvailableAAMs();
+//    }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.GET,
-            value = SecurityConstants.AAM_GET_AVAILABLE_AAMS)
-    public ResponseEntity legacy2GetAvailableAAMs() {
-        return getAvailableAAMs();
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.GET,
+//            value = SecurityConstants.AAM_GET_AVAILABLE_AAMS)
+//    public ResponseEntity legacy2GetAvailableAAMs() {
+//        return getAvailableAAMs();
+//    }
 
     /**
      * Endpoint for listing available AAM instances.
@@ -373,21 +383,21 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.GET,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
-    public ResponseEntity legacyGetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
-                                                        @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
-        return getComponentCertificate(componentIdentifier, platformIdentifier);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.GET,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+//    public ResponseEntity legacyGetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
+//                                                        @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
+//        return getComponentCertificate(componentIdentifier, platformIdentifier);
+//    }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.GET,
-            value = SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
-    public ResponseEntity legacy2GetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
-                                                         @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
-        return getComponentCertificate(componentIdentifier, platformIdentifier);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.GET,
+//            value = SecurityConstants.AAM_GET_COMPONENT_CERTIFICATE + "/platform/{platformIdentifier}/component/{componentIdentifier}")
+//    public ResponseEntity legacy2GetComponentCertificate(@ApiParam(value = "Component identifier", required = true) @PathVariable String componentIdentifier,
+//                                                         @ApiParam(value = "Platform identifier", required = true) @PathVariable String platformIdentifier) {
+//        return getComponentCertificate(componentIdentifier, platformIdentifier);
+//    }
 
     /**
      * Endpoint for getting component certificate.
@@ -398,7 +408,7 @@ public class CoreInterfaceController {
      */
     @ApiOperation(value = "Get component certificate", response = String.class)
     @ApiResponses({
-            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 200, message = "The component certificate in PEM format", response = String.class),
             @ApiResponse(code = 500, message = "Could not retrieve Component Certificate"),
             @ApiResponse(code = 404, message = "Certificate could not be found")})
     @RequestMapping(method = RequestMethod.GET,
@@ -419,19 +429,19 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
-    public ResponseEntity legacySignCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
-        return signCertificateRequest(certificateRequest);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+//    public ResponseEntity legacySignCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
+//        return signCertificateRequest(certificateRequest);
+//    }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
-    public ResponseEntity legacy2SignCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
-        return signCertificateRequest(certificateRequest);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = SecurityConstants.AAM_SIGN_CERTIFICATE_REQUEST)
+//    public ResponseEntity legacy2SignCertificateRequest(@ApiParam(value = "Certificate request", required = true) @RequestBody CertificateRequest certificateRequest) {
+//        return signCertificateRequest(certificateRequest);
+//    }
 
     /**
      * Endpoint for signing certificate request
@@ -441,7 +451,7 @@ public class CoreInterfaceController {
      */
     @ApiOperation(value = "Allows signing certificates' requests")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 200, message = "The certificate in PEM format", response = String.class),
             @ApiResponse(code = 403, message = "Client account is not activated or blocked"),
             @ApiResponse(code = 500, message = "Could not sign the requested certificate")})
     @RequestMapping(method = RequestMethod.POST,
@@ -463,19 +473,19 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_REVOKE_CREDENTIALS)
-    public ResponseEntity legacyRevokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
-        return revokeCredentials(revocationRequest);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_REVOKE_CREDENTIALS)
+//    public ResponseEntity legacyRevokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
+//        return revokeCredentials(revocationRequest);
+//    }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_REVOKE_CREDENTIALS)
-    public ResponseEntity legacy2RevokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
-        return revokeCredentials(revocationRequest);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = SecurityConstants.AAM_REVOKE_CREDENTIALS)
+//    public ResponseEntity legacy2RevokeCredentials(@ApiParam(value = "Revocation request", required = true) @RequestBody RevocationRequest revocationRequest) {
+//        return revokeCredentials(revocationRequest);
+//    }
 
     /**
      * Exposes a service that allows users to revoke their client certificates and tokens.
@@ -508,26 +518,30 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_GUEST_TOKEN)
-    public ResponseEntity legacyGetGuestToken() {
-        return getGuestToken();
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_GUEST_TOKEN)
+//    public ResponseEntity legacyGetGuestToken() {
+//        return getGuestToken();
+//    }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_GUEST_TOKEN)
-    public ResponseEntity legacy2GetGuestToken() {
-        return getGuestToken();
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = SecurityConstants.AAM_GET_GUEST_TOKEN)
+//    public ResponseEntity legacy2GetGuestToken() {
+//        return getGuestToken();
+//    }
 
     /**
      * @return GUEST token used to access public resources offered in SymbIoTe
      */
     @ApiOperation(value = "Issues a Guest Token")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 200, message = "OK",
+                    responseHeaders = @ResponseHeader(name = SecurityConstants.TOKEN_HEADER_NAME,
+                            description = "Guest Token",
+                            response = String.class),
+                    response = String.class),
             @ApiResponse(code = 500, message = "Could not create Guest Token")})
     @CrossOrigin(exposedHeaders = {"x-auth-token"})
     @RequestMapping(method = RequestMethod.POST,
@@ -547,19 +561,19 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_HOME_TOKEN)
-    public ResponseEntity legacyGetHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
-        return getHomeToken(loginRequest);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_HOME_TOKEN)
+//    public ResponseEntity legacyGetHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
+//        return getHomeToken(loginRequest);
+//    }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_HOME_TOKEN)
-    public ResponseEntity legacy2GetHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
-        return getHomeToken(loginRequest);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = SecurityConstants.AAM_GET_HOME_TOKEN)
+//    public ResponseEntity legacy2GetHomeToken(@ApiParam(value = "Login request", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String loginRequest) {
+//        return getHomeToken(loginRequest);
+//    }
 
     /**
      * @param loginRequest JWS build in accordance to @{@link eu.h2020.symbiote.security.helpers.CryptoHelper#buildHomeTokenAcquisitionRequest(HomeCredentials)}
@@ -568,7 +582,11 @@ public class CoreInterfaceController {
      */
     @ApiOperation(value = "Issues a Home Token")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 200, message = "OK",
+                    responseHeaders = @ResponseHeader(name = SecurityConstants.TOKEN_HEADER_NAME,
+                            description = "Home Token",
+                            response = String.class),
+                    response = String.class),
             @ApiResponse(code = 400, message = "Received token was malformed"),
             @ApiResponse(code = 401, message = "Incorrect Credentials were provided"),
             @ApiResponse(code = 403, message = "Client account is not activated or blocked"),
@@ -594,81 +612,83 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
-    public ResponseEntity legacyGetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
-                                                @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                                @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
-        return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+//    public ResponseEntity legacyGetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
+//                                                @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+//                                                @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+//        return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
+//    }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_FOREIGN_TOKEN)
-    public ResponseEntity legacy2GetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
-                                                 @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                                 @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
-        return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+//    public ResponseEntity legacy2GetForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
+//                                                 @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+//                                                 @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+//        return getForeignToken(remoteHomeToken, clientCertificate, aamCertificate);
+//    }
 
+//
+//    /**
+//     * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
+//     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
+//     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
+//     * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
+//     */
+//    @ApiOperation(value = "Issues a Foreign Token")
+//    @ApiResponses(value = {
+//            @ApiResponse(code = 200, message = "OK",
+//                    responseHeaders = @ResponseHeader(name = "X-Rack-Cache", description = "Explains whether or not a cache was used"),
+//                    response = String.class),
+//            @ApiResponse(code = 401, message = "Received token could not be validated"),
+//            @ApiResponse(code = 403, message = "Received token belonged to a blocked client"),
+//            @ApiResponse(code = 500, message = "Server failed to create Foreign Token")})
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = AAM_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
+//    public ResponseEntity getForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
+//                                          @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+//                                          @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
+//        log.debug("Get foreign token");
+//        try {
+//            HttpHeaders httpHeaders = new HttpHeaders();
+//            httpHeaders.add(SecurityConstants.TOKEN_HEADER_NAME, remoteHomeToken);
+//            httpHeaders.add(SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, clientCertificate);
+//            httpHeaders.add(SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, aamCertificate);
+//            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+//
+//            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_FOREIGN_TOKEN, entity, String.class);
+//
+//            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
+//
+//            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
+//        } catch (HttpStatusCodeException e) {
+//            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
+//            log.debug(e);
+//            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+//        }
+//    }
+//
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
+//    public ResponseEntity legacyValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
+//                                                    @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+//                                                    @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+//                                                    @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+//        return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
+//    }
 
-    /**
-     * @param remoteHomeToken   that an actor wants to exchange in this AAM for a FOREIGN token
-     * @param clientCertificate in PEM with key matching the SPK claim in the provided token in 'offline' (intranet) scenarios
-     * @param aamCertificate    in PEM with key matching the IPK claim in the provided token in 'offline' (intranet) scenarios
-     * @return FOREIGN token used to access restricted resources offered in SymbIoTe federations
-     */
-    @ApiOperation(value = "Issues a Foreign Token")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = String.class),
-            @ApiResponse(code = 401, message = "Received token could not be validated"),
-            @ApiResponse(code = 403, message = "Received token belonged to a blocked client"),
-            @ApiResponse(code = 500, message = "Server failed to create Foreign Token")})
-    @RequestMapping(method = RequestMethod.POST,
-            value = AAM_PREFIX + SecurityConstants.AAM_GET_FOREIGN_TOKEN)
-    public ResponseEntity getForeignToken(@ApiParam(value = "Remote home token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String remoteHomeToken,
-                                          @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                          @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String aamCertificate) {
-        log.debug("Get foreign token");
-        try {
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(SecurityConstants.TOKEN_HEADER_NAME, remoteHomeToken);
-            httpHeaders.add(SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, clientCertificate);
-            httpHeaders.add(SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, aamCertificate);
-            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
-
-            ResponseEntity<String> stringResponseEntity = this.restTemplate.postForEntity(this.aamUrl + SecurityConstants.AAM_GET_FOREIGN_TOKEN, entity, String.class);
-
-            HttpHeaders headers = stripTransferEncoding(stringResponseEntity.getHeaders());
-
-            return new ResponseEntity<>(stringResponseEntity.getBody(), headers, stringResponseEntity.getStatusCode());
-        } catch (HttpStatusCodeException e) {
-            log.info(ERROR_PROXY_STATUS_MSG + e.getStatusCode());
-            log.debug(e);
-            return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-        }
-    }
-
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_VALIDATE_CREDENTIALS)
-    public ResponseEntity legacyValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
-                                                    @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                                    @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
-                                                    @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
-        return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
-    }
-
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_VALIDATE_CREDENTIALS)
-    public ResponseEntity legacy2ValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
-                                                     @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
-                                                     @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
-                                                     @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
-        return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = SecurityConstants.AAM_VALIDATE_CREDENTIALS)
+//    public ResponseEntity legacy2ValidateCredentials(@ApiParam(value = "Token", required = true) @RequestHeader(SecurityConstants.TOKEN_HEADER_NAME) String token,
+//                                                     @ApiParam(value = "Client certificate") @RequestHeader(name = SecurityConstants.CLIENT_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificate,
+//                                                     @ApiParam(value = "AAM certificate") @RequestHeader(name = SecurityConstants.AAM_CERTIFICATE_HEADER_NAME, defaultValue = "") String clientCertificateSigningAAMCertificate,
+//                                                     @ApiParam(value = "Foreign token") @RequestHeader(name = SecurityConstants.FOREIGN_TOKEN_ISSUING_AAM_CERTIFICATE, defaultValue = "") String foreignTokenIssuingAAMCertificate) {
+//        return validateCredentials(token, clientCertificate, clientCertificateSigningAAMCertificate, foreignTokenIssuingAAMCertificate);
+//    }
 
     /**
      * @param token                                  that is to be validated
@@ -708,19 +728,19 @@ public class CoreInterfaceController {
         }
     }
 
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
-    public ResponseEntity legacyGetUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
-        return getUserDetails(credentials);
-    }
-
-    @Deprecated
-    @RequestMapping(method = RequestMethod.POST,
-            value = SecurityConstants.AAM_GET_USER_DETAILS)
-    public ResponseEntity legacy2GetUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
-        return getUserDetails(credentials);
-    }
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = LEGACY_URI_PREFIX + SecurityConstants.AAM_GET_USER_DETAILS)
+//    public ResponseEntity legacyGetUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
+//        return getUserDetails(credentials);
+//    }
+//
+//    @Deprecated
+//    @RequestMapping(method = RequestMethod.POST,
+//            value = SecurityConstants.AAM_GET_USER_DETAILS)
+//    public ResponseEntity legacy2GetUserDetails(@ApiParam(value = "User credentials", required = true) @RequestBody Credentials credentials) {
+//        return getUserDetails(credentials);
+//    }
 
     /**
      * @param credentials of a user whose details are requested

@@ -5,8 +5,8 @@ buildscript {
         asciiDocOutputDir = file("${buildDir}/asciidoc/generated")
         swaggerOutputDir = file("${buildDir}/swagger")
         snippetsOutputDir = file("${buildDir}/asciidoc/snippets")
-        springfoxVersion = '2.7.0'
-        swaggerAnnotationsVersion = '1.5.13'
+        springfoxVersion = '2.8.0'
+        swaggerAnnotationsVersion = '1.5.21'
     }
     repositories {
         mavenCentral()

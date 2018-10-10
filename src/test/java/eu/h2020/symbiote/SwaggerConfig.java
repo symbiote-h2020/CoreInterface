@@ -40,7 +40,7 @@ public class SwaggerConfig {
 //                        ),
 //                        new ApiKey("api_key", "api_key", "header")
 //                ))
-                .host("https://symbiote.man.poznan.pl:8100")
+                .host("https://symbiote-open.man.poznan.pl")
                 .produces(producesSet())
                 .select()
                 .paths(Predicates.and(ant("/**"), Predicates.not(ant("/error")), Predicates.not(ant("/management/**")), Predicates.not(ant("/management*"))))
@@ -54,7 +54,7 @@ public class SwaggerConfig {
                 .contact(new Contact("Artur Jaworski", "https://www.symbiote-h2020.eu/", "artur.jaworski@man.poznan.pl"))
                 .license("GNU Lesser General Public License v3.0")
                 .licenseUrl("https://github.com/symbiote-h2020/CoreInterface/blob/master/LICENSE.txt")
-                .version("0.2.0")
+                .version("3.0.0")
                 .build();
     }
 
