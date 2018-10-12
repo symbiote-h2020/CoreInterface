@@ -877,7 +877,7 @@ public class CoreInterfaceController {
                                          @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
         log.debug("Register coupon");
         try {
-            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+            HttpEntity<String> entity = new HttpEntity<>(couponString, httpHeaders);
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + SecurityConstants.BTM_REGISTER_COUPON, HttpMethod.POST, entity, String.class);
 
@@ -900,7 +900,7 @@ public class CoreInterfaceController {
                                          @RequestHeader(SecurityConstants.COUPON_HEADER_NAME) String couponString) {
         log.debug("Is coupon valid");
         try {
-            HttpEntity<String> entity = new HttpEntity<>(null, httpHeaders);
+            HttpEntity<String> entity = new HttpEntity<>(couponString, httpHeaders);
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + SecurityConstants.BTM_IS_COUPON_VALID, HttpMethod.POST, entity, String.class);
 
@@ -943,7 +943,7 @@ public class CoreInterfaceController {
     public ResponseEntity cleanupConsumedCoupons(@RequestBody String timestamp) {
         log.debug("Cleanup consumed coupons");
         try {
-            HttpEntity<String> entity = new HttpEntity<>(timestamp, null);
+            HttpEntity<String> entity = new HttpEntity<>(timestamp, getHeaders());
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + SecurityConstants.BTM_CLEANUP_COUPONS, HttpMethod.POST, entity, String.class);
 
@@ -965,7 +965,7 @@ public class CoreInterfaceController {
     public ResponseEntity couponUsage(@RequestBody String filter) {
         log.debug("Coupon usage");
         try {
-            HttpEntity<String> entity = new HttpEntity<>(filter, null);
+            HttpEntity<String> entity = new HttpEntity<>(filter, getHeaders());
 
             ResponseEntity<String> stringResponseEntity = this.restTemplate.exchange(this.btmUrl + "/couponusage", HttpMethod.POST, entity, String.class);
 
@@ -1020,6 +1020,13 @@ public class CoreInterfaceController {
             log.error("Error in decoding: " + e.getMessage(), e);
         }
         return result;
+    }
+
+    private HttpHeaders getHeaders() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return httpHeaders;
     }
 
 
