@@ -42,6 +42,9 @@ public class RabbitManager {
     @Value("${rabbit.password}")
     private String rabbitPassword;
 
+    @Value("${spring.rabbitmq.template.reply-timeout}")
+    private Integer rabbitMessageTimeout;
+
     @Value("${rabbit.exchange.resource.name}")
     private String resourceExchangeName;
 
@@ -93,6 +96,8 @@ public class RabbitManager {
     private Connection connection;
     private Channel channel;
 
+    private Map<String, Object> queueArgs;
+
     /**
      * Method used to override connection parameters.
      * Used ONLY for unit testing.
@@ -110,6 +115,7 @@ public class RabbitManager {
         this.rabbitHost = rabbitHost;
         this.rabbitUsername = rabbitUsername;
         this.rabbitPassword = rabbitPassword;
+        this.rabbitMessageTimeout = 30000;
 
         this.cramExchangeName = exchangeName;
         this.cramExchangeType = exchangeType;
@@ -131,6 +137,9 @@ public class RabbitManager {
      */
     public void initCommunication() {
         log.info("RabbitMQ communication init for " + this.rabbitUsername + "@"+ this.rabbitHost);
+
+        queueArgs = new HashMap<>();
+        queueArgs.put("x-message-ttl", rabbitMessageTimeout);
         try {
             ConnectionFactory factory = new ConnectionFactory();
 
@@ -194,7 +203,8 @@ public class RabbitManager {
         try {
             log.info("Sending RPC message: " + message);
 
-            String replyQueueName = this.channel.queueDeclare().getQueue();
+            String replyQueueName = UUID.randomUUID().toString();
+            this.channel.queueDeclare(replyQueueName, false, true, true, queueArgs);
 
             String correlationId = UUID.randomUUID().toString();
 

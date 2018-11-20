@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
@@ -51,7 +53,9 @@ public class RabbitManagerCommunicationTests {
         this.channel.queueDelete(QUEUE_RPC_NAME);
         this.channel.exchangeDelete(EXCHANGE_NAME);
 
-        this.channel.queueDeclare(QUEUE_RPC_NAME, QUEUE_RPC_DURABLE, QUEUE_RPC_EXCLUSIVE, QUEUE_RPC_AUTODELETE, null);
+        Map<String,Object> queueArgs = new HashMap<>();
+        queueArgs.put("x-message-ttl", 30000);
+        this.channel.queueDeclare(QUEUE_RPC_NAME, QUEUE_RPC_DURABLE, QUEUE_RPC_EXCLUSIVE, QUEUE_RPC_AUTODELETE, queueArgs);
         this.channel.exchangeDeclare(EXCHANGE_NAME, EXCHANGE_TYPE, EXCHANGE_DURABLE, EXCHANGE_AUTODELTE, EXCHANGE_INTERNAL, null);
 
         this.channel.queueBind(QUEUE_RPC_NAME, EXCHANGE_NAME, ROUTING_RPC_KEY);
