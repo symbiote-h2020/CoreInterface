@@ -254,6 +254,7 @@ public class CoreInterfaceController {
             request.setSecurityRequest(securityRequest);
             request.setBody(sparqlQuery.getSparqlQuery());
             request.setOutputFormat(sparqlQuery.getOutputFormat());
+            request.setBaseModel(sparqlQuery.getBaseModel());
             SparqlQueryResponse sparqlQueryResponse = this.rabbitManager.sendSparqlSearchRequest(request);
             if (sparqlQueryResponse == null) {
                 return new ResponseEntity<>(new SparqlQueryResponse(HttpStatus.GATEWAY_TIMEOUT.value(), ERROR_GATEWAY_TIMEOUT, null), getServiceResponseHeaders(sparqlQueryResponse), HttpStatus.GATEWAY_TIMEOUT);
