@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.15.RELEASE'
-        springCloudVersion = 'Dalston.SR5'
+        springBootVersion = '1.5.18.RELEASE'
+        springCloudVersion = 'Edgware.SR5'
         asciiDocOutputDir = file("${buildDir}/asciidoc/generated")
         swaggerOutputDir = file("${buildDir}/swagger")
         snippetsOutputDir = file("${buildDir}/asciidoc/snippets")
@@ -92,10 +92,7 @@ dependencies {
             3) project dependency requires changes in settings.gradle file in this project
             4) never commit build.gradle which has project dependencies active as it will break CI builds
     */
-    compile('com.github.symbiote-h2020:SymbIoTeLibraries:5.34.1') {
-        changing = true
-        exclude group: 'org.slf4j'
-    }
+    compile('com.github.symbiote-h2020:SymbIoTeLibraries:5.37+') { changing = true }
 
     // Spring
     compile('org.springframework.cloud:spring-cloud-starter-config')
